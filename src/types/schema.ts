@@ -11,7 +11,7 @@ export const CardSchema = z.object({
   id: z.string(),
   columnId: z.string(),
   title: z.string(),
-  description: z.string(),
+  description: z.string().nullable(),
   dueDate: z.string().datetime().nullable(),
   order: z.number(),
   createdAt: z.string().datetime(),

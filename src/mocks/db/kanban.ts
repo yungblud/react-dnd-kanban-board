@@ -1,6 +1,8 @@
 import type { Column } from '@/types'
 import { mockData } from '../data'
 import { uuid } from '../utils'
+import type { z } from 'zod'
+import type { CreateCardRequestBodySchema } from '../types'
 
 export const kanbanDb = {
   listColumns: () => mockData.initialColumns,
@@ -52,5 +54,27 @@ export const kanbanDb = {
     const column = columns.find((column) => column.id === columnId)
     const cards = allCards.filter((card) => card.columnId === column?.id)
     return cards
+  },
+  addCard: ({
+    column_id: columnId,
+    title,
+    description,
+    due_date: dueDate,
+  }: z.infer<typeof CreateCardRequestBodySchema>) => {
+    const column = kanbanDb.getColumn({ id: columnId })
+    const cards = kanbanDb.listCards({ columnId: column!.id })
+    const lastOrder = cards.sort((a, b) => a.order - b.order).at(-1)?.order ?? 0
+    const newCard = {
+      columnId,
+      createdAt: new Date().toISOString(),
+      description: description,
+      dueDate: dueDate,
+      id: uuid(),
+      order: lastOrder + 1,
+      title: title,
+      updatedAt: new Date().toISOString(),
+    }
+    mockData.initialCards.push(newCard)
+    return newCard
   },
 }

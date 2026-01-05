@@ -18,3 +18,10 @@ export const HttpErrorCode = {
 export const CreateOrUpdateColumnRequestBodySchema = z.object({
   title: z.string(),
 })
+
+export const CreateCardRequestBodySchema = z.object({
+  column_id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  due_date: z.string().datetime().nullable(),
+})
