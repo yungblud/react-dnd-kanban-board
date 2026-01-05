@@ -6,6 +6,7 @@ import {
   useCreateColumnMutation,
   useListColumnsQuery,
   useRemoveColumnMutation,
+  useUpdateCardMutation,
   useUpdateColumnMutation,
 } from './api/queries'
 import { useQueryClient } from '@tanstack/react-query'
@@ -46,6 +47,16 @@ function App() {
   // @TODO: implement optimistic update
   const { mutate: createCard, isPending: isPendingCreateCard } =
     useCreateCardMutation({
+      onSuccess: () => {
+        console.log('success')
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
+  // @TODO: implement optimistic update
+  const { mutate: updateCard, isPending: isPendingUpdateCard } =
+    useUpdateCardMutation({
       onSuccess: () => {
         console.log('success')
         queryClient.invalidateQueries({
@@ -105,7 +116,20 @@ function App() {
                 }}
               >
                 {cards.map((card) => (
-                  <div key={card.id}>{card.title}</div>
+                  <div key={card.id}>
+                    {card.title}
+                    <button
+                      onClick={() => {
+                        if (isPendingUpdateCard) return
+                        updateCard({
+                          id: card.id,
+                          title: 'Mock Update Card Title',
+                        })
+                      }}
+                    >
+                      Update Card
+                    </button>
+                  </div>
                 ))}
               </KanbanColumn>
             )

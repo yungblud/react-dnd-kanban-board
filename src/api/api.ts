@@ -179,6 +179,50 @@ const createCard = async ({
   })
 }
 
+const updateCard = async ({
+  id,
+  title,
+  description,
+  dueDate,
+}: {
+  id: string
+  title?: string
+  description?: string
+  dueDate?: string
+}) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch(`/api/cards/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        id,
+        title,
+        description,
+        due_date: dueDate,
+      }),
+    })
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(CardSchema).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
 async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
   try {
     return await fetchFunc()
@@ -201,4 +245,5 @@ export const api = {
   updateColumn,
   removeColumn,
   createCard,
+  updateCard,
 }

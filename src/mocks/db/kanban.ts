@@ -94,8 +94,8 @@ export const kanbanDb = {
     id,
   }: z.infer<typeof UpdateCardRequestBodySchema> & { id: string }) => {
     const cards = [...mockData.initialCards].filter((card) => card.id !== id)
-    mockData.initialCards = cards
     const card = [...mockData.initialCards].find((card) => card.id === id)!
+    mockData.initialCards = cards
     const newCardValue: Card = {
       ...card,
       title: title ?? card.title,
