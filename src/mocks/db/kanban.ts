@@ -102,4 +102,9 @@ export const kanbanDb = {
     cards.push(newCardValue)
     return newCardValue
   },
+  removeCard: ({ id }: { id: string }) => {
+    mockData.initialCards = [...mockData.initialCards].filter(
+      (card) => card.id !== id
+    )
+  },
 }

@@ -96,4 +96,39 @@ export const cardHandlers = [
       })
     }
   }),
+  http.delete('/api/cards/:id', async ({ params }) => {
+    try {
+      const id = params.id as string
+      const existing = kanbanDb.getCard({ id })
+      if (!existing) {
+        const errorResponse = retrieveError({
+          code: HttpErrorCode.NOT_FOUND,
+          message: '해당 ID를 가진 card가 없습니다.',
+        })
+        return HttpResponse.json(errorResponse, {
+          status: HttpStatus.NOT_FOUND,
+        })
+      }
+
+      kanbanDb.removeCard({ id })
+
+      const response = await retrieveWithDelay(
+        retrieveResponse<{ success: boolean }>({
+          success: true,
+        })
+      )
+      return HttpResponse.json(response, {
+        status: HttpStatus.SUCCESS,
+      })
+    } catch (e) {
+      console.error(e)
+      const errorResponse = retrieveError({
+        code: HttpErrorCode.INTERNAL_SERVER_ERROR,
+        message: 'internal server error',
+      })
+      return HttpResponse.json(errorResponse, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      })
+    }
+  }),
 ]
