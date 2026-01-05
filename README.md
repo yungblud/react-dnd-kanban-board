@@ -32,6 +32,10 @@
 - api fetcher 공통 함수는 `src/api`에서 관리합니다
 - client side에서 response를 한번 더 zod를 사용하여 safeParse 할 수 있도록 zod util을 활용하였습니다 (`src/types/schema.ts`)
 
+## handle server state
+
+- server state를 관리하기 위해 tanstack react-query를 적용하였습니다
+
 ## models (DTO)
 
 - model data type은 `src/types/index.ts`에 담아서 재활용 하였습니다
