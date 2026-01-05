@@ -1,3 +1,4 @@
 export * from './kanban-column'
 export * from './kanban-container'
 export * from './layout'
+export * from './kanban-card'
