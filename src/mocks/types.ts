@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 export const HttpStatus = {
   SUCCESS: 200,
   CREATE_SUCCESS: 201,
@@ -11,3 +13,7 @@ export const HttpErrorCode = {
   NOT_FOUND: 'NOT_FOUND',
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
 } as const
+
+export const CreateColumnRequestBodySchema = z.object({
+  title: z.string(),
+})
