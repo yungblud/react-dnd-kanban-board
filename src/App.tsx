@@ -1,5 +1,5 @@
 import { mockData } from './mocks/data'
-import { KanbanColumn, KanbanContainer, Layout } from './ui'
+import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
 
 const data = {
   columns: mockData.initialColumns,
