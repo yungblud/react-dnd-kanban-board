@@ -1,14 +1,29 @@
+import { mockData } from './mocks/data'
 import { KanbanColumn, KanbanContainer, Layout } from './ui'
 
-const columnsState = ['todo', 'in-progress', 'done'] as const
+const data = {
+  columns: mockData.initialColumns,
+  cards: mockData.initialCards,
+}
 
 function App() {
   return (
     <Layout>
       <KanbanContainer>
-        {columnsState.map((item) => (
-          <KanbanColumn key={item} state={item} />
-        ))}
+        {[...data.columns]
+          .sort((a, b) => a.order - b.order)
+          .map((column) => {
+            const cards = [...data.cards]
+              .filter((card) => card.columnId === column.id)
+              .sort((a, b) => a.order - b.order)
+            return (
+              <KanbanColumn key={column.id} {...column}>
+                {cards.map((card) => (
+                  <div key={card.id}>{card.title}</div>
+                ))}
+              </KanbanColumn>
+            )
+          })}
       </KanbanContainer>
     </Layout>
   )
