@@ -1,3 +1,3 @@
-export type WithOverlayId<T> = {
+export type WithOverlayId<T = object> = {
   overlayId?: string
 } & T
