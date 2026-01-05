@@ -21,11 +21,5 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
-  {
-    rules: {
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-    },
-  },
   eslintConfigPrettier,
 ])
