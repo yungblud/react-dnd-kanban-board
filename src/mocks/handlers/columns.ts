@@ -66,7 +66,7 @@ export const columnHandlers = [
       })
     }
   }),
-  http.patch('/api/:id', async ({ params, request }) => {
+  http.patch('/api/columns/:id', async ({ params, request }) => {
     try {
       const id = params.id as string
       const validation = CreateOrUpdateColumnRequestBodySchema.safeParse(
@@ -106,6 +106,30 @@ export const columnHandlers = [
       }
       const response = await retrieveWithDelay(
         retrieveResponse<Column>(updated)
+      )
+      return HttpResponse.json(response, {
+        status: HttpStatus.SUCCESS,
+      })
+    } catch (e) {
+      console.error(e)
+      const errorResponse = retrieveError({
+        code: HttpErrorCode.INTERNAL_SERVER_ERROR,
+        message: 'internal server error',
+      })
+      return HttpResponse.json(errorResponse, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      })
+    }
+  }),
+  http.delete('/api/columns/:id', async ({ params }) => {
+    try {
+      const id = params.id as string
+      const { deletedCards } = kanbanDb.removeColumn({ id })
+      const response = await retrieveWithDelay(
+        retrieveResponse({
+          success: true,
+          deleted_cards_count: deletedCards.length,
+        })
       )
       return HttpResponse.json(response, {
         status: HttpStatus.SUCCESS,

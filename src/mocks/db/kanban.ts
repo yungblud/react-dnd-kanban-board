@@ -28,6 +28,20 @@ export const kanbanDb = {
     column.title = title
     return column
   },
+  removeColumn: ({ id }: { id: string }) => {
+    mockData.initialColumns = mockData.initialColumns.filter(
+      (column) => column.id !== id
+    )
+    const deletedCards = [...mockData.initialCards].filter(
+      (card) => card.columnId === id
+    )
+    mockData.initialCards = [...mockData.initialCards].filter(
+      (card) => card.columnId !== id
+    )
+    return {
+      deletedCards,
+    }
+  },
   listCards: (params?: { columnId: string }) => {
     if (!params) return mockData.initialCards
 
