@@ -4,6 +4,7 @@ export default function GlobalStyle() {
   return (
     <Global
       styles={css`
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
         /* Box sizing */
         *,
         *::before,
@@ -32,6 +33,13 @@ export default function GlobalStyle() {
           min-height: 100vh;
           text-rendering: optimizeSpeed;
           line-height: 1.5;
+          font-family:
+            'Noto Sans KR',
+            -apple-system,
+            BlinkMacSystemFont,
+            'Apple SD Gothic Neo',
+            'Segoe UI',
+            sans-serif;
         }
 
         /* Remove list styles */
