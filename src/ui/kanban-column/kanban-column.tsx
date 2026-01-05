@@ -1,14 +1,29 @@
 import styled from '@emotion/styled'
 import { memo, type PropsWithChildren } from 'react'
 import type { Column } from '../../types'
+import { Button } from '../button'
 
 const Column = styled.div`
-  border: 1px solid #ababab;
   min-height: 520px;
+  min-width: 268px;
+
+  padding: 0.875rem;
+
+  background-color: #e6e2d7;
+
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
 
   & + & {
-    margin-left: 1.5rem;
+    margin-left: 1rem;
   }
+`
+
+const Title = styled.h1`
+  font-size: 1rem;
+  margin-bottom: 0.875rem;
 `
 
 export const KanbanColumn = memo(
@@ -27,11 +42,15 @@ export const KanbanColumn = memo(
   >) => {
     return (
       <Column>
-        {title}
-        <button onClick={onClickUpdate}>수정하기</button>
-        <button onClick={onClickRemove}>삭제하기</button>
+        <Title>{title}</Title>
+        <Button onClick={onClickUpdate}>수정하기</Button>
+        <Button onClick={onClickRemove} style={{ marginTop: '0.5rem' }}>
+          삭제하기
+        </Button>
         {children}
-        <button onClick={onClickAddCard}>카드 추가</button>
+        <Button onClick={onClickAddCard} style={{ marginTop: '0.85rem' }}>
+          카드 추가
+        </Button>
       </Column>
     )
   }

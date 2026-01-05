@@ -41,4 +41,10 @@
 
 - model data type은 `src/types/index.ts`에 담아서 재활용 하였습니다
 
+## Misc
+
+- modal UI를 구현하기 위해 overlay-kit을 사용하였습니다
+- form validation 및 form state 관리를 구현하기 위해 react-hook-form을 사용하였습니다
+- Font: NotoSans KR 적용하였습니다
+
 🧪 문서를 꼼꼼히 읽었습니다

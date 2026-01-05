@@ -5,17 +5,35 @@ import type { WithOverlayId } from '../modal/modal.types'
 import { format, isBefore, isValid } from 'date-fns'
 import { useForm } from 'react-hook-form'
 import styled from '@emotion/styled'
-import {
-  queryKeys,
-  useRemoveCardMutation,
-  useUpdateCardMutation,
-} from '@/api/queries'
+import { queryKeys, useUpdateCardMutation } from '@/api/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { overlay } from 'overlay-kit'
+import { Button } from '../button'
+import { KanbanCardRemoveModal } from '../kanban-card-remove-modal'
 
 const ModalInner = styled.div`
   display: flex;
   flex-direction: column;
+  width: 662px;
+`
+
+const Label = styled.label`
+  font-weight: 400;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+`
+
+const Input = styled.input`
+  border: 1px solid rgb(242, 243, 247);
+  padding: 0.5rem;
+  border-radius: 4px;
+`
+
+const Textarea = styled.textarea`
+  border: 1px solid rgb(242, 243, 247);
+  padding: 0.5rem;
+  border-radius: 4px;
 `
 
 const formatDate = (dateStr: string) =>
@@ -83,26 +101,15 @@ export const KanbanCardModal = memo(
         },
       })
 
-    // @TODO: implement optimistic update
-    const { mutate: removeCard, isPending: isPendingRemoveCard } =
-      useRemoveCardMutation({
-        onSuccess: () => {
-          console.log('success')
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.column.list(),
-          })
-        },
-      })
-
     return (
       <Modal overlayId={overlayId}>
         <ModalInner>
-          <label>제목</label>
-          <input {...register('title')} />
-          <label>설명</label>
-          <textarea {...register('description')}>{description}</textarea>
-          <label>마감일</label>
-          <input
+          <Label>제목</Label>
+          <Input {...register('title')} />
+          <Label>설명</Label>
+          <Textarea {...register('description')}>{description}</Textarea>
+          <Label>마감일</Label>
+          <Input
             style={{ color: isExpired ? 'red' : 'black' }}
             {...register('dueDate', {
               validate: (value) => {
@@ -114,12 +121,12 @@ export const KanbanCardModal = memo(
           {formState.errors.dueDate && (
             <p>{formState.errors.dueDate.message}</p>
           )}
-          <label>생성일</label>
+          <Label>생성일</Label>
           <p>{formatDate(createdAt)}</p>
-          <label>수정일</label>
+          <Label>수정일</Label>
           <p>{formatDate(updatedAt)}</p>
           {formState.isDirty && (
-            <button
+            <Button
               onClick={() => {
                 if (isPendingUpdateCard) return
                 const formValues = getValues()
@@ -148,32 +155,20 @@ export const KanbanCardModal = memo(
               }}
             >
               저장하기
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             onClick={() => {
               overlay.open(
                 ({ isOpen, overlayId }) =>
                   isOpen && (
-                    <Modal overlayId={overlayId}>
-                      삭제하시겠습니까?
-                      <button
-                        onClick={() => {
-                          if (isPendingRemoveCard) return
-                          removeCard({
-                            id,
-                          })
-                        }}
-                      >
-                        네
-                      </button>
-                    </Modal>
+                    <KanbanCardRemoveModal overlayId={overlayId} id={id} />
                   )
               )
             }}
           >
             삭제하기
-          </button>
+          </Button>
         </ModalInner>
       </Modal>
     )
