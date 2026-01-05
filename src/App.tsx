@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
-import type { ColumnWithCard, HttpResponse } from './types'
+import type { ColumnWithCard } from './types'
+import { api } from './api'
 
 function App() {
   const [columns, setColumns] = useState<ColumnWithCard[]>([])
   useEffect(() => {
-    fetch('/api/columns').then(async (result) => {
-      const json = (await result.json()) as HttpResponse<ColumnWithCard[]>
-      setColumns(json.data)
+    api.fetchColumns().then((data) => {
+      setColumns(data.data)
     })
   }, [])
 
