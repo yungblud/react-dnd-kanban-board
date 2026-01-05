@@ -84,6 +84,8 @@ function App() {
                 <KanbanColumn
                   key={column.id}
                   {...column}
+                  // @TODO: enhance this prop
+                  cards={cards}
                   onClickUpdate={() => {
                     if (isPendingUpdateColumn) return
                     updateColumn({
@@ -107,8 +109,9 @@ function App() {
                     })
                   }}
                 >
-                  {cards.map((card) => (
-                    <KanbanCard key={card.id} {...card} />
+                  {cards.map((card, index) => (
+                    // @TODO: enhance index prop
+                    <KanbanCard key={card.id} {...card} index={index} />
                   ))}
                 </KanbanColumn>
               )

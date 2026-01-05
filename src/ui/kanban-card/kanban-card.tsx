@@ -1,24 +1,50 @@
 import type { Card } from '@/types'
 import styled from '@emotion/styled'
 import { overlay } from 'overlay-kit'
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import { KanbanCardModal } from '../kanban-card-modal'
 import { isBefore } from 'date-fns'
 import { motion } from 'framer-motion'
+import { useDragStore } from '@/lib/store'
+import { useShallow } from 'zustand/shallow'
+import { queryKeys, useMoveCardMutation } from '@/api/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 const motionDiv = motion.div
 
 const DRAG_THRESHOLD = 6 // px
 
-type DragState = {
-  cardId: string
-  fromColumnId: string
-  pointerX: number
-  pointerY: number
-  offsetX: number
-  offsetY: number
-  visible: boolean
-} | null
+function getTargetColumn(x: number, y: number): HTMLElement | null {
+  const columns = document.querySelectorAll<HTMLElement>('[data-column-id]')
+
+  for (const col of columns) {
+    const rect = col.getBoundingClientRect()
+    if (
+      x >= rect.left &&
+      x <= rect.right &&
+      y >= rect.top &&
+      y <= rect.bottom
+    ) {
+      return col
+    }
+  }
+  return null
+}
+
+function getInsertIndex(columnEl: HTMLElement, pointerY: number) {
+  const cards = Array.from(
+    columnEl.querySelectorAll<HTMLElement>('[data-card-id]')
+  )
+
+  for (let i = 0; i < cards.length; i++) {
+    const rect = cards[i].getBoundingClientRect()
+    if (pointerY < rect.top + rect.height / 2) {
+      return i
+    }
+  }
+
+  return cards.length
+}
 
 const Container = styled(motionDiv)<{ $isExpired?: boolean }>`
   border-radius: 12px;
@@ -38,12 +64,18 @@ const Title = styled.p`
   font-weight: 550;
 `
 
-export const KanbanCard = memo((props: Card) => {
-  const { title, dueDate, id, columnId } = props
+export const KanbanCard = memo((props: Card & { index: number }) => {
+  const { title, dueDate, id, columnId, index } = props
 
   const dragStartPointRef = useRef<{ x: number; y: number } | null>(null)
 
-  const [dragState, setDragState] = useState<DragState>(null)
+  // @TODO: enhance subscribe and rerender issue
+  const dragState = useDragStore(useShallow((state) => state.dragState))
+  const initializeDragState = useDragStore(
+    useShallow((state) => state.initialize)
+  )
+  const resetDragState = useDragStore(useShallow((state) => state.reset))
+  const moveDragState = useDragStore(useShallow((state) => state.move))
 
   const now = new Date()
   const isExpired = dueDate ? isBefore(new Date(dueDate), now) : false
@@ -68,17 +100,29 @@ export const KanbanCard = memo((props: Card) => {
       if (Math.sqrt(dx * dx + dy * dy) <= DRAG_THRESHOLD) {
         return
       }
+      if (!dragState) {
+        resetDragState()
+        return
+      }
 
-      setDragState((prev) =>
-        prev
-          ? {
-              ...prev,
-              pointerX: e.clientX,
-              pointerY: e.clientY,
-              visible: true,
-            }
-          : null
-      )
+      const pointerX = e.clientX
+      const pointerY = e.clientY
+
+      const columnEl = getTargetColumn(pointerX, pointerY)
+      if (!columnEl) {
+        moveDragState({ pointerX, pointerY })
+        return
+      }
+
+      const overColumnId = columnEl.dataset.columnId!
+      const overIndex = getInsertIndex(columnEl, pointerY)
+
+      moveDragState({
+        pointerX,
+        pointerY,
+        overColumnId,
+        overIndex,
+      })
     }
 
     window.addEventListener('pointermove', onPointerMove)
@@ -86,22 +130,45 @@ export const KanbanCard = memo((props: Card) => {
     return () => {
       window.removeEventListener('pointermove', onPointerMove)
     }
-  }, [dragState])
+  }, [dragState, moveDragState, resetDragState])
+
+  const queryClient = useQueryClient()
+
+  const { mutate: moveCard } = useMoveCardMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.column.list(),
+      })
+    },
+  })
 
   return (
     <>
+      {dragState?.overColumnId === columnId &&
+        dragState.overIndex === index && <div>Hello</div>}
       <Container
+        data-card-id={id}
         initial={{
           background: '#FFF',
         }}
         whileHover={{
           background: 'rgb(242, 243, 247)',
         }}
-        onClick={() => {
+        onPointerUp={() => {
           if (!dragState?.visible) {
             handleClick()
           }
-          setDragState(null)
+          if (
+            dragState?.overColumnId &&
+            typeof dragState.overIndex === 'number'
+          ) {
+            moveCard({
+              id,
+              targetColumnId: dragState.overColumnId,
+              newOrder: dragState.overIndex,
+            })
+          }
+          resetDragState()
         }}
         $isExpired={isExpired}
         onPointerDown={(e) => {
@@ -113,7 +180,7 @@ export const KanbanCard = memo((props: Card) => {
           const offsetX = pointerX - rect.left
           const offsetY = pointerY - rect.top
 
-          setDragState({
+          initializeDragState({
             cardId: id,
             fromColumnId: columnId,
             pointerX,
