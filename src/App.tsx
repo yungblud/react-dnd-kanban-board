@@ -5,6 +5,7 @@ import {
   useCreateCardMutation,
   useCreateColumnMutation,
   useListColumnsQuery,
+  useRemoveCardMutation,
   useRemoveColumnMutation,
   useUpdateCardMutation,
   useUpdateColumnMutation,
@@ -57,6 +58,16 @@ function App() {
   // @TODO: implement optimistic update
   const { mutate: updateCard, isPending: isPendingUpdateCard } =
     useUpdateCardMutation({
+      onSuccess: () => {
+        console.log('success')
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
+  // @TODO: implement optimistic update
+  const { mutate: removeCard, isPending: isPendingRemoveCard } =
+    useRemoveCardMutation({
       onSuccess: () => {
         console.log('success')
         queryClient.invalidateQueries({
@@ -128,6 +139,16 @@ function App() {
                       }}
                     >
                       Update Card
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (isPendingRemoveCard) return
+                        removeCard({
+                          id: card.id,
+                        })
+                      }}
+                    >
+                      Remove Card
                     </button>
                   </div>
                 ))}
