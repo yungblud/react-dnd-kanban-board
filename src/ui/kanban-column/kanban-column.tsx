@@ -12,10 +12,19 @@ const Column = styled.div`
 `
 
 export const KanbanColumn = memo(
-  ({ children, title }: PropsWithChildren<Column>) => {
+  ({
+    children,
+    title,
+    onClickUpdate,
+  }: PropsWithChildren<
+    Column & {
+      onClickUpdate?: () => void
+    }
+  >) => {
     return (
       <Column>
         {title}
+        <button onClick={onClickUpdate}>수정하기</button>
         {children}
       </Column>
     )

@@ -71,6 +71,38 @@ const createColumn = async ({ title }: { title: string }) => {
   })
 }
 
+const updateColumn = async ({ id, title }: { id: string; title: string }) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch(`/api/columns/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        title,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(ColumnSchema).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
 async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
   try {
     return await fetchFunc()
@@ -90,4 +122,5 @@ async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
 export const api = {
   fetchColumns,
   createColumn,
+  updateColumn,
 }
