@@ -1,7 +1,8 @@
 import styled from '@emotion/styled'
-import { memo, type PropsWithChildren } from 'react'
-import type { Column } from '../../types'
+import { memo, useCallback, type PropsWithChildren } from 'react'
+import type { Card, Column } from '../../types'
 import { Button } from '../button'
+import { useDragStore } from '@/lib/store'
 
 const Column = styled.div`
   min-height: 520px;
@@ -28,26 +29,40 @@ const Title = styled.h1`
 
 export const KanbanColumn = memo(
   ({
+    id,
     children,
     title,
     onClickUpdate,
     onClickRemove,
     onClickAddCard,
+    cards,
   }: PropsWithChildren<
     Column & {
       onClickUpdate?: () => void
       onClickRemove?: () => void
       onClickAddCard?: () => void
+    } & {
+      cards: Card[]
     }
   >) => {
+    const dragState = useDragStore(
+      useCallback(
+        (state) =>
+          state.dragState?.overColumnId === id ? state.dragState : null,
+        [id]
+      )
+    )
     return (
-      <Column>
+      <Column data-column-id={id}>
         <Title>{title}</Title>
         <Button onClick={onClickUpdate}>수정하기</Button>
         <Button onClick={onClickRemove} style={{ marginTop: '0.5rem' }}>
           삭제하기
         </Button>
         {children}
+        {/* 맨 마지막 drop */}
+        {dragState?.overColumnId === id &&
+          dragState.overIndex === cards.length && <div>Hello</div>}
         <Button onClick={onClickAddCard} style={{ marginTop: '0.85rem' }}>
           카드 추가
         </Button>

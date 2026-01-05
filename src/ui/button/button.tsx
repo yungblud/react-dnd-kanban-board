@@ -12,9 +12,9 @@ const Btn = styled.button`
 `
 
 export const Button = forwardRef<HTMLButtonElement, Props>(
-  ({ children, onClick, ...otherProps }) => {
+  ({ children, onClick, ...otherProps }, ref) => {
     return (
-      <Btn onClick={onClick} {...otherProps}>
+      <Btn ref={ref} onClick={onClick} {...otherProps}>
         {children}
       </Btn>
     )

@@ -118,12 +118,13 @@ export const kanbanDb = {
     id: string
   }) => {
     const card = kanbanDb.getCard({ id })!
-    const column = kanbanDb.getColumn({ id: targetColumnId })!
-    if (column.id !== card.columnId) {
-      mockData.initialCards = [...mockData.initialCards].filter(
-        (card) => card.id !== id
-      )
+    if (card.columnId === targetColumnId && card.order === newOrder) {
+      return card
     }
+    const column = kanbanDb.getColumn({ id: targetColumnId })!
+    mockData.initialCards = [...mockData.initialCards].filter(
+      (card) => card.id !== id
+    )
     const movedCard: Card = {
       ...card,
       columnId: targetColumnId,

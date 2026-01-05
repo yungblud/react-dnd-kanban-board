@@ -255,6 +255,47 @@ const removeCard = async ({ id }: { id: string }) => {
   })
 }
 
+const moveCard = async ({
+  id,
+  targetColumnId,
+  newOrder,
+}: {
+  id: string
+  targetColumnId: string
+  newOrder: number
+}) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch(`/api/cards/${id}/move`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        id,
+        target_column_id: targetColumnId,
+        new_order: newOrder,
+      }),
+    })
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(CardSchema).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
 async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
   try {
     return await fetchFunc()
@@ -279,4 +320,5 @@ export const api = {
   createCard,
   updateCard,
   removeCard,
+  moveCard,
 }
