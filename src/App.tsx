@@ -1,19 +1,23 @@
-import { mockData } from './mocks/data'
+import { useEffect, useState } from 'react'
 import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
-
-const data = {
-  columns: mockData.initialColumns,
-  cards: mockData.initialCards,
-}
+import type { ColumnWithCard, HttpResponse } from './types'
 
 function App() {
+  const [columns, setColumns] = useState<ColumnWithCard[]>([])
+  useEffect(() => {
+    fetch('/api/columns').then(async (result) => {
+      const json = (await result.json()) as HttpResponse<ColumnWithCard[]>
+      setColumns(json.data)
+    })
+  }, [])
+
   return (
     <Layout>
       <KanbanContainer>
-        {[...data.columns]
+        {[...columns]
           .sort((a, b) => a.order - b.order)
           .map((column) => {
-            const cards = [...data.cards]
+            const cards = [...column.cards]
               .filter((card) => card.columnId === column.id)
               .sort((a, b) => a.order - b.order)
             return (

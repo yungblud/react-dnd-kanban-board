@@ -1,11 +1,15 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import GlobalStyle from './styles/global-style.tsx'
+async function enableMocking() {
+  if (import.meta.env.MODE !== 'development') {
+    return
+  }
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-    <GlobalStyle />
-  </StrictMode>
-)
+  const { worker } = await import('./mocks/browser')
+
+  if (import.meta.env.VITE_MSW === 'true') {
+    await worker.start()
+  }
+}
+
+enableMocking().then(() => {
+  import('./bootstrap')
+})

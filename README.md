@@ -19,3 +19,15 @@
 ## Styles
 
 - emotion + css in js 를 사용하였습니다.
+
+## MSW (mock api)
+
+- mock api 서버는 msw를 사용하여 구현하였습니다
+- `.env.development`의 환경변수를 이용하여 제어가 가능합니다
+- api prefix로 `/api`를 붙였습니다
+
+## models (DTO)
+
+- model data type은 `src/types/index.ts`에 담아서 재활용 하였습니다
+
+🧪 문서를 꼼꼼히 읽었습니다

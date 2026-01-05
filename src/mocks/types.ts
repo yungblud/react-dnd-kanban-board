@@ -1,0 +1,13 @@
+export const HttpStatus = {
+  SUCCESS: 200,
+  CREATE_SUCCESS: 201,
+  INVALID_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500,
+} as const
+
+export const HttpErrorCode = {
+  INVALID_REQUEST: 'INVALID_REQUEST',
+  NOT_FOUND: 'NOT_FOUND',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+} as const
