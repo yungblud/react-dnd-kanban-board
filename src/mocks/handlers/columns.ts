@@ -41,8 +41,8 @@ export const columnHandlers = [
       )
       if (validation.error) {
         const errorResponse = retrieveError({
-          code: HttpErrorCode.INVALID_REQUEST,
-          message: 'invalid body',
+          code: HttpErrorCode.VALIDATION_ERROR,
+          message: '컬럼 제목은 필수입니다.',
         })
         return HttpResponse.json(errorResponse, {
           status: HttpStatus.INVALID_REQUEST,
