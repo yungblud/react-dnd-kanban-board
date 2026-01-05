@@ -1,12 +1,12 @@
 import { http, HttpResponse } from 'msw'
 import { mockData } from '../data'
-import { retrieveResponse } from '../utils'
+import { retrieveResponse, retrieveWithDelay } from '../utils'
 import { HttpStatus } from '../types'
 import type { ColumnWithCard } from '@/types'
 
 export const columnHandlers = [
-  http.get('/api/columns', () => {
-    return HttpResponse.json(
+  http.get('/api/columns', async () => {
+    const response = await retrieveWithDelay(
       retrieveResponse<ColumnWithCard[]>(
         mockData.initialColumns.map((column) => ({
           ...column,
@@ -17,10 +17,10 @@ export const columnHandlers = [
             updatedAt: new Date().toISOString(),
           })),
         }))
-      ),
-      {
-        status: HttpStatus.SUCCESS,
-      }
+      )
     )
+    return HttpResponse.json(response, {
+      status: HttpStatus.SUCCESS,
+    })
   }),
 ]
