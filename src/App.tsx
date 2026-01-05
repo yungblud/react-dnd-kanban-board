@@ -1,14 +1,16 @@
-import { KanbanColumn, KanbanContainer } from './ui'
+import { KanbanColumn, KanbanContainer, Layout } from './ui'
 
 const columnsState = ['todo', 'in-progress', 'done'] as const
 
 function App() {
   return (
-    <KanbanContainer>
-      {columnsState.map((item) => (
-        <KanbanColumn key={item} state={item} />
-      ))}
-    </KanbanContainer>
+    <Layout>
+      <KanbanContainer>
+        {columnsState.map((item) => (
+          <KanbanColumn key={item} state={item} />
+        ))}
+      </KanbanContainer>
+    </Layout>
   )
 }
 
