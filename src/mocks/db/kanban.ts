@@ -1,6 +1,12 @@
-import type { Column } from '@/types'
+import type { Card, Column } from '@/types'
 import { mockData } from '../data'
 import { uuid } from '../utils'
+import type { z } from 'zod'
+import type {
+  CreateCardRequestBodySchema,
+  MoveCardRequestBodySchema,
+  UpdateCardRequestBodySchema,
+} from '../types'
 
 export const kanbanDb = {
   listColumns: () => mockData.initialColumns,
@@ -52,5 +58,92 @@ export const kanbanDb = {
     const column = columns.find((column) => column.id === columnId)
     const cards = allCards.filter((card) => card.columnId === column?.id)
     return cards
+  },
+  getCard: ({ id }: { id: string }) => {
+    const cards = kanbanDb.listCards()
+    return cards.find((card) => card.id === id)
+  },
+  addCard: ({
+    column_id: columnId,
+    title,
+    description,
+    due_date: dueDate,
+  }: z.infer<typeof CreateCardRequestBodySchema>) => {
+    const column = kanbanDb.getColumn({ id: columnId })
+    const cards = kanbanDb.listCards({ columnId: column!.id })
+    // Card Order는 0부터 시작
+    const lastOrder =
+      cards.sort((a, b) => a.order - b.order).at(-1)?.order ?? -1
+    const newCard = {
+      columnId,
+      createdAt: new Date().toISOString(),
+      description: description,
+      dueDate: dueDate,
+      id: uuid(),
+      order: lastOrder + 1,
+      title: title,
+      updatedAt: new Date().toISOString(),
+    }
+    mockData.initialCards.push(newCard)
+    return newCard
+  },
+  updateCard: ({
+    title,
+    description,
+    due_date: dueDate,
+    id,
+  }: z.infer<typeof UpdateCardRequestBodySchema> & { id: string }) => {
+    const cards = [...mockData.initialCards].filter((card) => card.id !== id)
+    mockData.initialCards = cards
+    const card = [...mockData.initialCards].find((card) => card.id === id)!
+    const newCardValue: Card = {
+      ...card,
+      title: title ?? card.title,
+      description: description ?? card.description,
+      dueDate: dueDate ?? card.dueDate,
+    }
+    cards.push(newCardValue)
+    return newCardValue
+  },
+  removeCard: ({ id }: { id: string }) => {
+    mockData.initialCards = [...mockData.initialCards].filter(
+      (card) => card.id !== id
+    )
+  },
+  moveCard: ({
+    id,
+    target_column_id: targetColumnId,
+    new_order: newOrder,
+  }: z.infer<typeof MoveCardRequestBodySchema> & {
+    id: string
+  }) => {
+    const card = kanbanDb.getCard({ id })!
+    const column = kanbanDb.getColumn({ id: targetColumnId })!
+    if (column.id !== card.columnId) {
+      mockData.initialCards = [...mockData.initialCards].filter(
+        (card) => card.id !== id
+      )
+    }
+    const movedCard: Card = {
+      ...card,
+      columnId: targetColumnId,
+    }
+    const cards = [...mockData.initialCards]
+      .filter((card) => card.columnId === column.id)
+      .sort((a, b) => a.order - b.order)
+
+    cards.splice(newOrder, 0, movedCard)
+
+    const reordered = cards.map((card, index) => ({
+      ...card,
+      order: index,
+    }))
+
+    mockData.initialCards = [
+      ...mockData.initialCards.filter((card) => card.columnId !== column.id),
+      ...reordered,
+    ]
+
+    return movedCard
   },
 }
