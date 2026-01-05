@@ -1,12 +1,24 @@
 import type { Card, Column } from '../types'
 
-const initialColumns: Column[] = [
-  { id: 'col_001', title: 'To Do', order: 0 },
-  { id: 'col_002', title: 'In Progress', order: 1 },
-  { id: 'col_003', title: 'Done', order: 2 },
+const initialColumns: Omit<Column, 'createdAt'>[] = [
+  {
+    id: 'col_001',
+    title: 'To Do',
+    order: 0,
+  },
+  {
+    id: 'col_002',
+    title: 'In Progress',
+    order: 1,
+  },
+  {
+    id: 'col_003',
+    title: 'Done',
+    order: 2,
+  },
 ]
 
-const initialCards: Card[] = [
+const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
   {
     id: 'card_001',
     columnId: 'col_001',
