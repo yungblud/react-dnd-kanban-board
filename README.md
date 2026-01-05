@@ -26,6 +26,7 @@
 - `.env.development`의 환경변수를 이용하여 제어가 가능합니다
 - api prefix로 `/api`를 붙였습니다
 - 200 ~ 500ms 사이로 랜덤하게 delay를 붙였습니다
+- in memory db 형식을 차용하여 CRUD에 대응 하였습니다
 
 ## api fetchers (api-sdk)
 
