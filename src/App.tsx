@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { mockData } from './mocks/data'
 import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
 
@@ -7,6 +8,12 @@ const data = {
 }
 
 function App() {
+  useEffect(() => {
+    fetch('/api/columns').then(async (result) => {
+      console.log(await result.json())
+    })
+  }, [])
+
   return (
     <Layout>
       <KanbanContainer>
