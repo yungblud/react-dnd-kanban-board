@@ -17,10 +17,12 @@ export const KanbanColumn = memo(
     title,
     onClickUpdate,
     onClickRemove,
+    onClickAddCard,
   }: PropsWithChildren<
     Column & {
       onClickUpdate?: () => void
       onClickRemove?: () => void
+      onClickAddCard?: () => void
     }
   >) => {
     return (
@@ -29,6 +31,7 @@ export const KanbanColumn = memo(
         <button onClick={onClickUpdate}>수정하기</button>
         <button onClick={onClickRemove}>삭제하기</button>
         {children}
+        <button onClick={onClickAddCard}>카드 추가</button>
       </Column>
     )
   }

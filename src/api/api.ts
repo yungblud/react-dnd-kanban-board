@@ -1,10 +1,12 @@
 import {
+  CardSchema,
   ColumnSchema,
   ColumnWithCardSchema,
   createHttpResponseSchema,
 } from '@/types/schema'
 import { ApiError } from './api.error'
 import { z } from 'zod'
+import type { Card } from '@/types'
 
 const baseURL = 'http://localhost:5173/api'
 
@@ -137,6 +139,46 @@ const removeColumn = async ({ id }: { id: string }) => {
   })
 }
 
+const createCard = async ({
+  columnId,
+  title,
+  description,
+  dueDate,
+}: Pick<Card, 'columnId' | 'title' | 'description' | 'dueDate'>) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch(`/api/cards`, {
+      method: 'POST',
+      body: JSON.stringify({
+        column_id: columnId,
+        title,
+        description,
+        due_date: dueDate,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(CardSchema).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
 async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
   try {
     return await fetchFunc()
@@ -158,4 +200,5 @@ export const api = {
   createColumn,
   updateColumn,
   removeColumn,
+  createCard,
 }

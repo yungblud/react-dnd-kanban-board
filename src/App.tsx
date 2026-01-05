@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
 import {
   queryKeys,
+  useCreateCardMutation,
   useCreateColumnMutation,
   useListColumnsQuery,
   useRemoveColumnMutation,
@@ -35,6 +36,16 @@ function App() {
   // @TODO: implement optimistic update
   const { mutate: removeColumn, isPending: isPendingRemoveColumn } =
     useRemoveColumnMutation({
+      onSuccess: () => {
+        console.log('success')
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
+  // @TODO: implement optimistic update
+  const { mutate: createCard, isPending: isPendingCreateCard } =
+    useCreateCardMutation({
       onSuccess: () => {
         console.log('success')
         queryClient.invalidateQueries({
@@ -81,6 +92,15 @@ function App() {
                   if (isPendingRemoveColumn) return
                   removeColumn({
                     id: column.id,
+                  })
+                }}
+                onClickAddCard={() => {
+                  if (isPendingCreateCard) return
+                  createCard({
+                    columnId: column.id,
+                    description: 'Mock Create Card Description',
+                    dueDate: new Date('2026-02-03').toISOString(),
+                    title: 'Mock Create Card Title',
                   })
                 }}
               >
