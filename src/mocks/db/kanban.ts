@@ -18,6 +18,16 @@ export const kanbanDb = {
     mockData.initialColumns.push(newColumn)
     return mockData.initialColumns
   },
+  getColumn: ({ id }: { id: string }) => {
+    const columns = kanbanDb.listColumns()
+    return columns.find((column) => column.id === id)
+  },
+  updateColumn: ({ id, title }: { id: string; title: string }) => {
+    const column = kanbanDb.getColumn({ id })
+    if (!column) return null
+    column.title = title
+    return column
+  },
   listCards: (params?: { columnId: string }) => {
     if (!params) return mockData.initialCards
 
@@ -26,7 +36,7 @@ export const kanbanDb = {
     const allCards = mockData.initialCards
 
     const column = columns.find((column) => column.id === columnId)
-    const card = allCards.filter((card) => card.columnId === column?.id)
-    return card
+    const cards = allCards.filter((card) => card.columnId === column?.id)
+    return cards
   },
 }

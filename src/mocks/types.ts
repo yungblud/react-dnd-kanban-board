@@ -15,6 +15,6 @@ export const HttpErrorCode = {
   VALIDATION_ERROR: 'VALIDATION_ERROR',
 } as const
 
-export const CreateColumnRequestBodySchema = z.object({
+export const CreateOrUpdateColumnRequestBodySchema = z.object({
   title: z.string(),
 })
