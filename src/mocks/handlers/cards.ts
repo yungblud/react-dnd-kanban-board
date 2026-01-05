@@ -158,7 +158,9 @@ export const cardHandlers = [
           status: HttpStatus.NOT_FOUND,
         })
       }
-      const existingColumn = kanbanDb.getColumn({ id })
+      const existingColumn = kanbanDb.getColumn({
+        id: validation.data.target_column_id,
+      })
       if (!existingColumn) {
         const errorResponse = retrieveError({
           code: HttpErrorCode.NOT_FOUND,
