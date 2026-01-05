@@ -4,19 +4,26 @@ import { overlay } from 'overlay-kit'
 import { memo, useCallback } from 'react'
 import { KanbanCardModal } from '../kanban-card-modal'
 import { isBefore } from 'date-fns'
+import { motion } from 'framer-motion'
 
-const Container = styled.div<{ $isExpired?: boolean }>`
-  border-radius: 4px;
+const motionDiv = motion.div
+
+const Container = styled(motionDiv)<{ $isExpired?: boolean }>`
+  border-radius: 12px;
   border: ${(props) =>
     props.$isExpired ? '1px solid red' : '1px solid black'};
 
-  padding: 12px 8px;
+  padding: 12px 12px;
   cursor: pointer;
   width: 240px;
+
+  margin-top: 0.5rem;
 `
 
 const Title = styled.p`
   margin: unset;
+  font-size: 0.875rem;
+  font-weight: 550;
 `
 
 export const KanbanCard = memo((props: Card) => {
@@ -35,7 +42,16 @@ export const KanbanCard = memo((props: Card) => {
   }, [props])
 
   return (
-    <Container onClick={handleClick} $isExpired={isExpired}>
+    <Container
+      initial={{
+        background: '#FFF',
+      }}
+      whileHover={{
+        background: 'rgb(242, 243, 247)',
+      }}
+      onClick={handleClick}
+      $isExpired={isExpired}
+    >
       <Title>{title}</Title>
     </Container>
   )

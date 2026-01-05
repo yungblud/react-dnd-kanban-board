@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { KanbanCard, KanbanColumn, KanbanContainer, Layout } from '@/ui'
+import { Button, KanbanCard, KanbanColumn, KanbanContainer, Layout } from '@/ui'
 import {
   queryKeys,
   useCreateCardMutation,
@@ -61,57 +61,61 @@ function App() {
   }
 
   return (
-    <Layout>
-      <button
-        onClick={() => {
-          if (isPendingCreateColumn) return
-          createColumn({ title: 'Mock Title' })
-        }}
-      >
-        컬럼 추가
-      </button>
-      <KanbanContainer>
-        {[...columnsData]
-          .sort((a, b) => a.order - b.order)
-          .map((column) => {
-            const cards = [...column.cards]
-              .filter((card) => card.columnId === column.id)
-              .sort((a, b) => a.order - b.order)
-            return (
-              <KanbanColumn
-                key={column.id}
-                {...column}
-                onClickUpdate={() => {
-                  if (isPendingUpdateColumn) return
-                  updateColumn({
-                    id: column.id,
-                    title: 'Mock Update Title',
-                  })
-                }}
-                onClickRemove={() => {
-                  if (isPendingRemoveColumn) return
-                  removeColumn({
-                    id: column.id,
-                  })
-                }}
-                onClickAddCard={() => {
-                  if (isPendingCreateCard) return
-                  createCard({
-                    columnId: column.id,
-                    description: 'Mock Create Card Description',
-                    dueDate: new Date('2026-02-03').toISOString(),
-                    title: 'Mock Create Card Title',
-                  })
-                }}
-              >
-                {cards.map((card) => (
-                  <KanbanCard key={card.id} {...card} />
-                ))}
-              </KanbanColumn>
-            )
-          })}
-      </KanbanContainer>
-    </Layout>
+    <Layout
+      addColumnBtn={
+        <Button
+          onClick={() => {
+            if (isPendingCreateColumn) return
+            createColumn({ title: 'Mock Title' })
+          }}
+        >
+          컬럼 추가
+        </Button>
+      }
+      kanban={
+        <KanbanContainer>
+          {[...columnsData]
+            .sort((a, b) => a.order - b.order)
+            .map((column) => {
+              const cards = [...column.cards]
+                .filter((card) => card.columnId === column.id)
+                .sort((a, b) => a.order - b.order)
+              return (
+                <KanbanColumn
+                  key={column.id}
+                  {...column}
+                  onClickUpdate={() => {
+                    if (isPendingUpdateColumn) return
+                    updateColumn({
+                      id: column.id,
+                      title: 'Mock Update Title',
+                    })
+                  }}
+                  onClickRemove={() => {
+                    if (isPendingRemoveColumn) return
+                    removeColumn({
+                      id: column.id,
+                    })
+                  }}
+                  onClickAddCard={() => {
+                    if (isPendingCreateCard) return
+                    createCard({
+                      columnId: column.id,
+                      description: 'Mock Create Card Description',
+                      dueDate: new Date('2026-02-03').toISOString(),
+                      title: 'Mock Create Card Title',
+                    })
+                  }}
+                >
+                  {cards.map((card) => (
+                    <KanbanCard key={card.id} {...card} />
+                  ))}
+                </KanbanColumn>
+              )
+            })}
+        </KanbanContainer>
+      }
+    />
   )
 }
 
