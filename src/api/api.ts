@@ -1,4 +1,8 @@
-import { ColumnWithCardSchema, createHttpResponseSchema } from '@/types/schema'
+import {
+  ColumnSchema,
+  ColumnWithCardSchema,
+  createHttpResponseSchema,
+} from '@/types/schema'
 import { ApiError } from './api.error'
 import { z } from 'zod'
 
@@ -35,6 +39,104 @@ const fetchColumns = async () => {
   })
 }
 
+const createColumn = async ({ title }: { title: string }) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch('/api/columns', {
+      method: 'POST',
+      body: JSON.stringify({
+        title,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(ColumnSchema).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
+const updateColumn = async ({ id, title }: { id: string; title: string }) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch(`/api/columns/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        title,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(ColumnSchema).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
+const removeColumn = async ({ id }: { id: string }) => {
+  return await withThrowApiError(async () => {
+    const response = await fetch(`/api/columns/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      throw new ApiError({
+        message: `Server Error: error code ${response.status}`,
+        code: response.status,
+      })
+    }
+
+    const json = await response.json()
+
+    const validation = createHttpResponseSchema(
+      z.object({
+        success: z.boolean(),
+        deleted_cards_count: z.number(),
+      })
+    ).safeParse(json)
+
+    if (validation.error) {
+      console.error(validation.error)
+      throw new ApiError({
+        message: 'schema parse failed',
+        code: 500,
+      })
+    }
+
+    return validation.data
+  })
+}
+
 async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
   try {
     return await fetchFunc()
@@ -53,4 +155,7 @@ async function withThrowApiError<T>(fetchFunc: () => Promise<T>): Promise<T> {
 
 export const api = {
   fetchColumns,
+  createColumn,
+  updateColumn,
+  removeColumn,
 }
