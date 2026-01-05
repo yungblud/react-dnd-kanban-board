@@ -57,9 +57,7 @@ const createColumn = async ({ title }: { title: string }) => {
 
     const json = await response.json()
 
-    const validation = createHttpResponseSchema(
-      z.array(ColumnSchema)
-    ).safeParse(json)
+    const validation = createHttpResponseSchema(ColumnSchema).safeParse(json)
 
     if (validation.error) {
       console.error(validation.error)

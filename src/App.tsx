@@ -1,9 +1,25 @@
 import { useMemo } from 'react'
 import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
-import { useListColumnsQuery } from './api/queries'
+import {
+  queryKeys,
+  useCreateColumnMutation,
+  useListColumnsQuery,
+} from './api/queries'
+import { useQueryClient } from '@tanstack/react-query'
 
 function App() {
+  const queryClient = useQueryClient()
   const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
+  // @TODO: implement optimistic update
+  const { mutate: createColumn, isPending: isPendingCreateColumn } =
+    useCreateColumnMutation({
+      onSuccess: () => {
+        console.log('success')
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
 
   const columnsData = useMemo(() => columns?.data ?? [], [columns?.data])
 
@@ -13,6 +29,14 @@ function App() {
 
   return (
     <Layout>
+      <button
+        onClick={() => {
+          if (isPendingCreateColumn) return
+          createColumn({ title: 'Mock Title' })
+        }}
+      >
+        컬럼 추가
+      </button>
       <KanbanContainer>
         {[...columnsData]
           .sort((a, b) => a.order - b.order)
