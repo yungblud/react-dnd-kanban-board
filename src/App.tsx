@@ -4,6 +4,7 @@ import {
   queryKeys,
   useCreateColumnMutation,
   useListColumnsQuery,
+  useRemoveColumnMutation,
   useUpdateColumnMutation,
 } from './api/queries'
 import { useQueryClient } from '@tanstack/react-query'
@@ -24,6 +25,16 @@ function App() {
   // @TODO: implement optimistic update
   const { mutate: updateColumn, isPending: isPendingUpdateColumn } =
     useUpdateColumnMutation({
+      onSuccess: () => {
+        console.log('success')
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
+  // @TODO: implement optimistic update
+  const { mutate: removeColumn, isPending: isPendingRemoveColumn } =
+    useRemoveColumnMutation({
       onSuccess: () => {
         console.log('success')
         queryClient.invalidateQueries({
@@ -64,6 +75,12 @@ function App() {
                   updateColumn({
                     id: column.id,
                     title: 'Mock Update Title',
+                  })
+                }}
+                onClickRemove={() => {
+                  if (isPendingRemoveColumn) return
+                  removeColumn({
+                    id: column.id,
                   })
                 }}
               >
