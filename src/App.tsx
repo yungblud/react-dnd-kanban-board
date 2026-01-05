@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { KanbanColumn, KanbanContainer, Layout } from '@/ui'
-import type { ColumnWithCard } from './types'
-import { api } from './api'
+import { useListColumnsQuery } from './api/queries'
 
 function App() {
-  const [columns, setColumns] = useState<ColumnWithCard[]>([])
-  useEffect(() => {
-    api.fetchColumns().then((data) => {
-      setColumns(data.data)
-    })
-  }, [])
+  const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
+
+  const columnsData = useMemo(() => columns?.data ?? [], [columns?.data])
+
+  if (isLoadingColumns) {
+    return null
+  }
 
   return (
     <Layout>
       <KanbanContainer>
-        {[...columns]
+        {[...columnsData]
           .sort((a, b) => a.order - b.order)
           .map((column) => {
             const cards = [...column.cards]
