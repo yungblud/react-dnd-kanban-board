@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
-import { memo } from 'react'
+import { memo, type PropsWithChildren } from 'react'
+import type { Column } from '../../types'
 
 const Column = styled.div`
   border: 1px solid #ababab;
@@ -11,7 +12,12 @@ const Column = styled.div`
 `
 
 export const KanbanColumn = memo(
-  ({ state }: { state: 'todo' | 'in-progress' | 'done' }) => {
-    return <Column>{state}</Column>
+  ({ children, title }: PropsWithChildren<Column>) => {
+    return (
+      <Column>
+        {title}
+        {children}
+      </Column>
+    )
   }
 )
