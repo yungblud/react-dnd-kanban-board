@@ -19,3 +19,5 @@
 ## Styles
 
 - emotion + css in js 를 사용하였습니다.
+
+🧪 문서를 꼼꼼히 읽었습니다
