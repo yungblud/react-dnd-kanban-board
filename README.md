@@ -7,6 +7,7 @@
 
 - Vite + React + Typescript
 - Package Manager: npm
+- Code Formatter: eslint + prettier + lefthook (pre-commit commitlint)
 
 ## Run
 
@@ -14,3 +15,7 @@
 - cd protopie-assignment
 - npm install
 - npm run dev
+
+## Styles
+
+- emotion + css in js 를 사용하였습니다.
