@@ -25,3 +25,9 @@ export const CreateCardRequestBodySchema = z.object({
   description: z.string().nullable(),
   due_date: z.string().datetime().nullable(),
 })
+
+export const UpdateCardRequestBodySchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  due_date: z.string().datetime().optional(),
+})

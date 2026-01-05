@@ -4,6 +4,7 @@ import {
   CreateCardRequestBodySchema,
   HttpErrorCode,
   HttpStatus,
+  UpdateCardRequestBodySchema,
 } from '../types'
 import { kanbanDb } from '../db/kanban'
 import type { Card } from '@/types'
@@ -37,6 +38,52 @@ export const cardHandlers = [
       const response = await retrieveWithDelay(retrieveResponse<Card>(newCard))
       return HttpResponse.json(response, {
         status: HttpStatus.CREATE_SUCCESS,
+      })
+    } catch (e) {
+      console.error(e)
+      const errorResponse = retrieveError({
+        code: HttpErrorCode.INTERNAL_SERVER_ERROR,
+        message: 'internal server error',
+      })
+      return HttpResponse.json(errorResponse, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      })
+    }
+  }),
+  http.patch('/api/cards/:id', async ({ params, request }) => {
+    try {
+      const id = params.id as string
+      const validation = UpdateCardRequestBodySchema.safeParse(
+        await request.json()
+      )
+      if (validation.error) {
+        const errorResponse = retrieveError({
+          code: HttpErrorCode.VALIDATION_ERROR,
+          message: 'Body 데이터가 부합하지 않습니다.',
+        })
+        return HttpResponse.json(errorResponse, {
+          status: HttpStatus.INVALID_REQUEST,
+        })
+      }
+      const existing = kanbanDb.getCard({ id })
+      if (!existing) {
+        const errorResponse = retrieveError({
+          code: HttpErrorCode.NOT_FOUND,
+          message: '해당 ID를 가진 card가 없습니다.',
+        })
+        return HttpResponse.json(errorResponse, {
+          status: HttpStatus.NOT_FOUND,
+        })
+      }
+      const updatedCard = kanbanDb.updateCard({
+        ...validation.data,
+        id,
+      })
+      const response = await retrieveWithDelay(
+        retrieveResponse<Card>(updatedCard)
+      )
+      return HttpResponse.json(response, {
+        status: HttpStatus.SUCCESS,
       })
     } catch (e) {
       console.error(e)
