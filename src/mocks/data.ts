@@ -1,24 +1,27 @@
 import type { Card, Column } from '../types'
 
-const initialColumns: Omit<Column, 'createdAt'>[] = [
+const initialColumns: Column[] = [
   {
     id: 'col_001',
     title: 'To Do',
     order: 0,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 'col_002',
     title: 'In Progress',
     order: 1,
+    createdAt: new Date().toISOString(),
   },
   {
     id: 'col_003',
     title: 'Done',
     order: 2,
+    createdAt: new Date().toISOString(),
   },
 ]
 
-const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
+const initialCards: Card[] = [
   {
     id: 'card_001',
     columnId: 'col_001',
@@ -26,6 +29,8 @@ const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
     description: '클라이언트 미팅 내용을 바탕으로 요구사항 문서 작성',
     dueDate: '2025-01-15T00:00:00Z',
     order: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: 'card_002',
@@ -34,6 +39,8 @@ const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
     description: '',
     dueDate: null,
     order: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: 'card_003',
@@ -42,6 +49,8 @@ const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
     description: 'Figma를 사용하여 주요 화면 와이어프레임 작성',
     dueDate: '2025-01-12T00:00:00Z',
     order: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: 'card_004',
@@ -50,6 +59,8 @@ const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
     description: 'Vite + React + TypeScript 프로젝트 초기 설정 완료',
     dueDate: null,
     order: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: 'card_005',
@@ -58,6 +69,8 @@ const initialCards: Omit<Card, 'createdAt' | 'updatedAt'>[] = [
     description: '이전 프로젝트에서 마이그레이션된 태스크',
     dueDate: '2025-01-05T00:00:00Z',
     order: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ]
 
