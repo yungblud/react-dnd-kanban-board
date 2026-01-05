@@ -26,6 +26,11 @@
 - `.env.development`의 환경변수를 이용하여 제어가 가능합니다
 - api prefix로 `/api`를 붙였습니다
 
+## api fetchers (api-sdk)
+
+- api fetcher 공통 함수는 `src/api`에서 관리합니다
+- client side에서 response를 한번 더 zod를 사용하여 safeParse 할 수 있도록 zod util을 활용하였습니다 (`src/types/schema.ts`)
+
 ## models (DTO)
 
 - model data type은 `src/types/index.ts`에 담아서 재활용 하였습니다
