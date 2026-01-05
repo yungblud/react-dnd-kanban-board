@@ -4,6 +4,7 @@ import { uuid } from '../utils'
 import type { z } from 'zod'
 import type {
   CreateCardRequestBodySchema,
+  MoveCardRequestBodySchema,
   UpdateCardRequestBodySchema,
 } from '../types'
 
@@ -70,7 +71,9 @@ export const kanbanDb = {
   }: z.infer<typeof CreateCardRequestBodySchema>) => {
     const column = kanbanDb.getColumn({ id: columnId })
     const cards = kanbanDb.listCards({ columnId: column!.id })
-    const lastOrder = cards.sort((a, b) => a.order - b.order).at(-1)?.order ?? 0
+    // Card Order는 0부터 시작
+    const lastOrder =
+      cards.sort((a, b) => a.order - b.order).at(-1)?.order ?? -1
     const newCard = {
       columnId,
       createdAt: new Date().toISOString(),
@@ -106,5 +109,41 @@ export const kanbanDb = {
     mockData.initialCards = [...mockData.initialCards].filter(
       (card) => card.id !== id
     )
+  },
+  moveCard: ({
+    id,
+    target_column_id: targetColumnId,
+    new_order: newOrder,
+  }: z.infer<typeof MoveCardRequestBodySchema> & {
+    id: string
+  }) => {
+    const card = kanbanDb.getCard({ id })!
+    const column = kanbanDb.getColumn({ id: targetColumnId })!
+    if (column.id !== card.columnId) {
+      mockData.initialCards = [...mockData.initialCards].filter(
+        (card) => card.id !== id
+      )
+    }
+    const movedCard: Card = {
+      ...card,
+      columnId: targetColumnId,
+    }
+    const cards = [...mockData.initialCards]
+      .filter((card) => card.columnId === column.id)
+      .sort((a, b) => a.order - b.order)
+
+    cards.splice(newOrder, 0, movedCard)
+
+    const reordered = cards.map((card, index) => ({
+      ...card,
+      order: index,
+    }))
+
+    mockData.initialCards = [
+      ...mockData.initialCards.filter((card) => card.columnId !== column.id),
+      ...reordered,
+    ]
+
+    return movedCard
   },
 }

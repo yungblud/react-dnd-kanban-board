@@ -4,6 +4,7 @@ import {
   CreateCardRequestBodySchema,
   HttpErrorCode,
   HttpStatus,
+  MoveCardRequestBodySchema,
   UpdateCardRequestBodySchema,
 } from '../types'
 import { kanbanDb } from '../db/kanban'
@@ -116,6 +117,63 @@ export const cardHandlers = [
         retrieveResponse<{ success: boolean }>({
           success: true,
         })
+      )
+      return HttpResponse.json(response, {
+        status: HttpStatus.SUCCESS,
+      })
+    } catch (e) {
+      console.error(e)
+      const errorResponse = retrieveError({
+        code: HttpErrorCode.INTERNAL_SERVER_ERROR,
+        message: 'internal server error',
+      })
+      return HttpResponse.json(errorResponse, {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+      })
+    }
+  }),
+  http.patch('/api/cards/:id/move', async ({ params, request }) => {
+    try {
+      const id = params.id as string
+      const validation = MoveCardRequestBodySchema.safeParse(
+        await request.json()
+      )
+      if (validation.error) {
+        const errorResponse = retrieveError({
+          code: HttpErrorCode.VALIDATION_ERROR,
+          message: 'Body 데이터가 부합하지 않습니다.',
+        })
+        return HttpResponse.json(errorResponse, {
+          status: HttpStatus.INVALID_REQUEST,
+        })
+      }
+
+      const existingCard = kanbanDb.getCard({ id })
+      if (!existingCard) {
+        const errorResponse = retrieveError({
+          code: HttpErrorCode.NOT_FOUND,
+          message: '해당 ID를 가진 card가 없습니다.',
+        })
+        return HttpResponse.json(errorResponse, {
+          status: HttpStatus.NOT_FOUND,
+        })
+      }
+      const existingColumn = kanbanDb.getColumn({ id })
+      if (!existingColumn) {
+        const errorResponse = retrieveError({
+          code: HttpErrorCode.NOT_FOUND,
+          message: '해당 ID를 가진 column이 없습니다.',
+        })
+        return HttpResponse.json(errorResponse, {
+          status: HttpStatus.NOT_FOUND,
+        })
+      }
+      const movedCard = kanbanDb.moveCard({
+        ...validation.data,
+        id,
+      })
+      const response = await retrieveWithDelay(
+        retrieveResponse<Card>(movedCard)
       )
       return HttpResponse.json(response, {
         status: HttpStatus.SUCCESS,
