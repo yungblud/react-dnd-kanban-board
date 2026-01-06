@@ -9,6 +9,7 @@ import { useDragStore } from '@/lib/store'
 import { useShallow } from 'zustand/shallow'
 import { queryKeys, useMoveCardMutation } from '@/api/queries'
 import { useQueryClient } from '@tanstack/react-query'
+import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
 
 const motionDiv = motion.div
 
@@ -145,7 +146,7 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
   return (
     <>
       {dragState?.overColumnId === columnId &&
-        dragState.overIndex === index && <div>Hello</div>}
+        dragState.overIndex === index && <KanbanCardPlaceholder />}
       <Container
         data-card-id={id}
         initial={{

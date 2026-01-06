@@ -3,6 +3,7 @@ import { memo, useCallback, type PropsWithChildren } from 'react'
 import type { Card, Column } from '../../types'
 import { Button } from '../button'
 import { useDragStore } from '@/lib/store'
+import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
 
 const Column = styled.div`
   min-height: 520px;
@@ -67,7 +68,7 @@ export const KanbanColumn = memo(
           {children}
           {/* 맨 마지막 drop */}
           {dragState?.overColumnId === id &&
-            dragState.overIndex === cards.length && <div>Hello</div>}
+            dragState.overIndex === cards.length && <KanbanCardPlaceholder />}
         </ChildrenWrapper>
         <Button onClick={onClickAddCard} style={{ marginTop: '0.85rem' }}>
           카드 추가
