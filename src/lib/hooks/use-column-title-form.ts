@@ -82,9 +82,8 @@ export function useColumnTitleForm(params: Params) {
 
   const onSubmit = useCallback(
     (values: Form) => {
-      console.log('onSubmit')
       if (params.mode === 'edit') {
-        if (isPendingUpdateColumn) return
+        if (isPendingUpdateColumn || !form.formState.isDirty) return
         updateColumn({
           id: params.editId,
           title: values.title,
@@ -98,6 +97,7 @@ export function useColumnTitleForm(params: Params) {
     },
     [
       createColumn,
+      form.formState.isDirty,
       isPendingCreateColumn,
       isPendingUpdateColumn,
       params,
