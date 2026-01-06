@@ -22,6 +22,10 @@ const Column = styled.div`
   }
 `
 
+const ChildrenWrapper = styled.div`
+  flex: 1;
+`
+
 const Title = styled.h1`
   font-size: 1rem;
   margin-bottom: 0.875rem;
@@ -59,10 +63,12 @@ export const KanbanColumn = memo(
         <Button onClick={onClickRemove} style={{ marginTop: '0.5rem' }}>
           삭제하기
         </Button>
-        {children}
-        {/* 맨 마지막 drop */}
-        {dragState?.overColumnId === id &&
-          dragState.overIndex === cards.length && <div>Hello</div>}
+        <ChildrenWrapper>
+          {children}
+          {/* 맨 마지막 drop */}
+          {dragState?.overColumnId === id &&
+            dragState.overIndex === cards.length && <div>Hello</div>}
+        </ChildrenWrapper>
         <Button onClick={onClickAddCard} style={{ marginTop: '0.85rem' }}>
           카드 추가
         </Button>
