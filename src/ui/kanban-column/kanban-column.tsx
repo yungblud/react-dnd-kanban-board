@@ -44,6 +44,7 @@ const ChildrenWrapper = styled.div`
 const Title = styled.h1`
   font-size: 1rem;
   margin-bottom: 0.875rem;
+  cursor: pointer;
 `
 
 export const KanbanColumn = memo(
