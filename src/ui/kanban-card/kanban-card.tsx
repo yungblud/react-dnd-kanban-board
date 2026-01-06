@@ -65,11 +65,11 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
   const openKanbanCardModal = useCallback(() => {
     const overlayId = overlay.open(
       ({ isOpen, overlayId }) =>
-        isOpen && <KanbanCardModal {...props} overlayId={overlayId} id={id} />
+        isOpen && <KanbanCardModal overlayId={overlayId} id={id} />
     )
 
     return () => overlay.close(overlayId)
-  }, [props, id])
+  }, [id])
 
   const queryClient = useQueryClient()
 
