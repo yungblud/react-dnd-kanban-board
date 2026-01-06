@@ -8,7 +8,7 @@ type Options = UseMutationOptions<
   Parameters<typeof api.removeCard>[0]
 >
 
-export function useRemoveCardMutation(options?: Options) {
+export function useRemoveCardMutation(options?: Partial<Options>) {
   return useMutation({
     mutationFn: (variables) => api.removeCard(variables),
     ...options,

@@ -15,7 +15,7 @@ type Options = UseMutationOptions<
   }
 >
 
-export function useRemoveColumnMutation(options?: Options) {
+export function useRemoveColumnMutation(options?: Partial<Options>) {
   return useMutation({
     mutationFn: (variables) => api.removeColumn(variables),
     ...options,

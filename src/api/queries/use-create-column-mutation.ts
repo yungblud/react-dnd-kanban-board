@@ -13,7 +13,7 @@ type Options = UseMutationOptions<
   }
 >
 
-export function useCreateColumnMutation(options?: Options) {
+export function useCreateColumnMutation(options?: Partial<Options>) {
   return useMutation({
     mutationFn: (variables) => api.createColumn(variables),
     ...options,

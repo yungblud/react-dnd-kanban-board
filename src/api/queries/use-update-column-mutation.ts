@@ -16,7 +16,7 @@ type Options = UseMutationOptions<
   }
 >
 
-export function useUpdateColumnMutation(options?: Options) {
+export function useUpdateColumnMutation(options?: Partial<Options>) {
   return useMutation({
     mutationFn: (variables) => api.updateColumn(variables),
     ...options,
