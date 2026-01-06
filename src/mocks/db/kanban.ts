@@ -101,6 +101,7 @@ export const kanbanDb = {
       title: title ?? card.title,
       description: description ?? card.description,
       dueDate: dueDate ?? card.dueDate,
+      updatedAt: new Date().toISOString(),
     }
     cards.push(newCardValue)
     return newCardValue

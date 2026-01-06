@@ -5,6 +5,7 @@ import type { WithOverlayId } from '../modal/modal.types'
 import { useQueryClient } from '@tanstack/react-query'
 import styled from '@emotion/styled'
 import { overlay } from 'overlay-kit'
+import type { ColumnWithCard, HttpResponse } from '@/types'
 
 const Inner = styled.div`
   display: flex;
@@ -16,15 +17,45 @@ export const KanbanCardRemoveModal = ({
   id,
 }: WithOverlayId<{ id: string }>) => {
   const queryClient = useQueryClient()
-  // @TODO: implement optimistic update
   const { mutate: removeCard, isPending: isPendingRemoveCard } =
     useRemoveCardMutation({
-      onSuccess: () => {
-        console.log('success')
+      onMutate: async (variables) => {
+        await queryClient.cancelQueries({
+          queryKey: queryKeys.column.list(),
+        })
+
+        const prevData = queryClient.getQueryData<
+          HttpResponse<ColumnWithCard[]>
+        >(queryKeys.column.list())
+
+        const newData: HttpResponse<ColumnWithCard[]> | undefined = prevData
+          ? {
+              ...prevData,
+              data: prevData.data.map((value) => {
+                return {
+                  ...value,
+                  cards: value.cards.filter((card) => card.id !== variables.id),
+                }
+              }),
+            }
+          : undefined
+
+        queryClient.setQueryData(queryKeys.column.list(), newData)
+
+        return {
+          newData,
+          prevData,
+        }
+      },
+      onError: (error, variables, ctx) => {
+        if (ctx?.prevData) {
+          queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
+        }
+      },
+      onSettled: () => {
         queryClient.invalidateQueries({
           queryKey: queryKeys.column.list(),
         })
-        overlay.closeAll()
       },
     })
   return (
@@ -37,6 +68,7 @@ export const KanbanCardRemoveModal = ({
             removeCard({
               id,
             })
+            overlay.closeAll()
           }}
           style={{ marginLeft: 'auto' }}
         >

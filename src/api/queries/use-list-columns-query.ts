@@ -8,7 +8,7 @@ type Options = UseQueryOptions<
   ApiError
 >
 
-export function useListColumnsQuery(options?: Options) {
+export function useListColumnsQuery(options?: Partial<Options>) {
   return useQuery({
     queryKey: queryKeys.column.list(),
     queryFn: () => api.fetchColumns(),

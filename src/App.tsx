@@ -1,58 +1,17 @@
 import { useMemo } from 'react'
-import { Button, KanbanCard, KanbanColumn, KanbanContainer, Layout } from '@/ui'
 import {
-  queryKeys,
-  useCreateCardMutation,
-  useCreateColumnMutation,
-  useListColumnsQuery,
-  useRemoveColumnMutation,
-  useUpdateColumnMutation,
-} from './api/queries'
-import { useQueryClient } from '@tanstack/react-query'
+  AddColumnButton,
+  KanbanCard,
+  KanbanColumn,
+  KanbanContainer,
+  Layout,
+} from '@/ui'
+import { useListColumnsQuery } from './api/queries'
 
 function App() {
-  const queryClient = useQueryClient()
-  const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
-  // @TODO: implement optimistic update
-  const { mutate: createColumn, isPending: isPendingCreateColumn } =
-    useCreateColumnMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
-  // @TODO: implement optimistic update
-  const { mutate: updateColumn, isPending: isPendingUpdateColumn } =
-    useUpdateColumnMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
-  // @TODO: implement optimistic update
-  const { mutate: removeColumn, isPending: isPendingRemoveColumn } =
-    useRemoveColumnMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
-  // @TODO: implement optimistic update
-  const { mutate: createCard, isPending: isPendingCreateCard } =
-    useCreateCardMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
+  const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery({
+    refetchOnMount: false,
+  })
 
   const columnsData = useMemo(() => columns?.data ?? [], [columns?.data])
 
@@ -62,16 +21,7 @@ function App() {
 
   return (
     <Layout
-      addColumnBtn={
-        <Button
-          onClick={() => {
-            if (isPendingCreateColumn) return
-            createColumn({ title: 'Mock Title' })
-          }}
-        >
-          컬럼 추가
-        </Button>
-      }
+      addColumnBtn={<AddColumnButton />}
       kanban={
         <KanbanContainer>
           {[...columnsData]
@@ -86,31 +36,8 @@ function App() {
                   {...column}
                   // @TODO: enhance this prop
                   cards={cards}
-                  onClickUpdate={() => {
-                    if (isPendingUpdateColumn) return
-                    updateColumn({
-                      id: column.id,
-                      title: 'Mock Update Title',
-                    })
-                  }}
-                  onClickRemove={() => {
-                    if (isPendingRemoveColumn) return
-                    removeColumn({
-                      id: column.id,
-                    })
-                  }}
-                  onClickAddCard={() => {
-                    if (isPendingCreateCard) return
-                    createCard({
-                      columnId: column.id,
-                      description: 'Mock Create Card Description',
-                      dueDate: new Date('2026-02-03').toISOString(),
-                      title: 'Mock Create Card Title',
-                    })
-                  }}
                 >
                   {cards.map((card, index) => (
-                    // @TODO: enhance index prop
                     <KanbanCard key={card.id} {...card} index={index} />
                   ))}
                 </KanbanColumn>

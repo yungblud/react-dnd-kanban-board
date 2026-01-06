@@ -1,17 +1,16 @@
-import type { Card } from '@/types'
-import styled from '@emotion/styled'
+import type { Card, ColumnWithCard, HttpResponse } from '@/types'
 import { overlay } from 'overlay-kit'
 import { memo, useCallback, useEffect, useRef } from 'react'
 import { KanbanCardModal } from '../kanban-card-modal'
 import { isBefore } from 'date-fns'
-import { motion } from 'framer-motion'
 import { useDragStore } from '@/lib/store'
 import { useShallow } from 'zustand/shallow'
 import { queryKeys, useMoveCardMutation } from '@/api/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
-
-const motionDiv = motion.div
+import { Container, Title } from './kanban-card.styled'
+import { KanbanDragCard } from './kanban-card.drag'
+import { produce } from 'immer'
 
 const DRAG_THRESHOLD = 6 // px
 
@@ -47,24 +46,6 @@ function getInsertIndex(columnEl: HTMLElement, pointerY: number) {
   return cards.length
 }
 
-const Container = styled(motionDiv)<{ $isExpired?: boolean }>`
-  border-radius: 12px;
-  border: ${(props) =>
-    props.$isExpired ? '1px solid red' : '1px solid black'};
-
-  padding: 12px 12px;
-  cursor: pointer;
-  width: 240px;
-
-  margin-top: 0.5rem;
-`
-
-const Title = styled.p`
-  margin: unset;
-  font-size: 0.875rem;
-  font-weight: 550;
-`
-
 export const KanbanCard = memo((props: Card & { index: number }) => {
   const { title, dueDate, id, columnId, index } = props
 
@@ -81,14 +62,16 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
   const now = new Date()
   const isExpired = dueDate ? isBefore(new Date(dueDate), now) : false
 
-  const handleClick = useCallback(() => {
+  const openKanbanCardModal = useCallback(() => {
     const overlayId = overlay.open(
       ({ isOpen, overlayId }) =>
-        isOpen && <KanbanCardModal {...props} overlayId={overlayId} />
+        isOpen && <KanbanCardModal {...props} overlayId={overlayId} id={id} />
     )
 
     return () => overlay.close(overlayId)
-  }, [props])
+  }, [props, id])
+
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!dragState) return
@@ -133,10 +116,70 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
     }
   }, [dragState, moveDragState, resetDragState])
 
-  const queryClient = useQueryClient()
-
   const { mutate: moveCard } = useMoveCardMutation({
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.column.list(),
+      })
+
+      const prevData = queryClient.getQueryData<HttpResponse<ColumnWithCard[]>>(
+        queryKeys.column.list()
+      )
+
+      const newData: HttpResponse<ColumnWithCard[]> | undefined = prevData
+        ? produce(prevData, (draft) => {
+            const sourceColumn = draft.data.find(
+              (col) => col.id === props.columnId
+            )
+            const targetColumn = draft.data.find(
+              (col) => col.id === variables.targetColumnId
+            )
+
+            if (!sourceColumn || !targetColumn) return
+
+            const cardIndex = sourceColumn.cards.findIndex(
+              (card) => card.id === variables.id
+            )
+
+            if (cardIndex === -1) return
+
+            const [movedCard] = sourceColumn.cards.splice(cardIndex, 1)
+
+            // 같은 컬럼 내 이동
+            if (sourceColumn.id === targetColumn.id) {
+              targetColumn.cards.splice(variables.newOrder, 0, movedCard)
+            } else {
+              // 다른 컬럼으로 이동
+              movedCard.columnId = targetColumn.id
+              targetColumn.cards.splice(variables.newOrder, 0, movedCard)
+            }
+
+            // order 재계산 (양쪽 컬럼 모두)
+            sourceColumn.cards.forEach((card, index) => {
+              card.order = index
+            })
+
+            if (sourceColumn.id !== targetColumn.id) {
+              targetColumn.cards.forEach((card, index) => {
+                card.order = index
+              })
+            }
+          })
+        : undefined
+
+      queryClient.setQueryData(queryKeys.column.list(), newData)
+
+      return {
+        newData,
+        prevData,
+      }
+    },
+    onError: (error, variables, ctx) => {
+      if (ctx?.prevData) {
+        queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.column.list(),
       })
@@ -157,7 +200,7 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
         }}
         onPointerUp={() => {
           if (!dragState?.visible) {
-            handleClick()
+            openKanbanCardModal()
           }
           if (
             dragState?.overColumnId &&
@@ -201,25 +244,7 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
       >
         <Title>{title}</Title>
       </Container>
-      {dragState && dragState.visible && (
-        <Container
-          style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            pointerEvents: 'none',
-            zIndex: 1000,
-            transform: `translate3d(
-        ${dragState.pointerX - dragState.offsetX}px,
-        ${dragState.pointerY - dragState.offsetY}px,
-        0
-      )`,
-            background: '#FFF',
-          }}
-        >
-          <Title>{title}</Title>
-        </Container>
-      )}
+      <KanbanDragCard />
     </>
   )
 })

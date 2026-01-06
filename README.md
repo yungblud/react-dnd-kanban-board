@@ -36,6 +36,7 @@
 ## handle server state
 
 - server state를 관리하기 위해 tanstack react-query를 적용하였습니다
+- 각각 필요한 mutation 부분에 적절한 optimistic update를 적용했습니다
 
 ## models (DTO)
 
