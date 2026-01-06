@@ -1,0 +1,120 @@
+import {
+  queryKeys,
+  useCreateColumnMutation,
+  useUpdateColumnMutation,
+} from '@/api/queries'
+import type { ColumnWithCard, HttpResponse } from '@/types'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { useForm } from 'react-hook-form'
+
+type Form = {
+  title: string
+}
+
+type Params =
+  | {
+      mode: 'create'
+    }
+  | {
+      mode: 'edit'
+      editId: string
+    }
+
+export function useColumnTitleForm(params: Params) {
+  const form = useForm<Form>({
+    mode: 'onChange',
+  })
+
+  const queryClient = useQueryClient()
+  const { mutate: createColumn, isPending: isPendingCreateColumn } =
+    useCreateColumnMutation({
+      onMutate: async (variables) => {
+        await queryClient.cancelQueries({
+          queryKey: queryKeys.column.list(),
+        })
+
+        const prevData = queryClient.getQueryData<
+          HttpResponse<ColumnWithCard[]>
+        >(queryKeys.column.list())
+
+        const newColumn = {
+          cards: [],
+          createdAt: new Date().toISOString(),
+          id: crypto.randomUUID(),
+          order: prevData?.data ? (prevData.data.at(-1)?.order ?? 0) + 1 : 1,
+          title: variables.title,
+        }
+
+        const newData: HttpResponse<ColumnWithCard[]> = {
+          ...prevData,
+          data: prevData?.data ? prevData.data.concat(newColumn) : [newColumn],
+        }
+
+        queryClient.setQueryData(queryKeys.column.list(), newData)
+
+        return {
+          prevData,
+          newData,
+        }
+      },
+      onError: (error, variables, ctx) => {
+        if (ctx?.prevData) {
+          queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
+        }
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
+
+  // @TODO: implement optimistic update
+  const { mutate: updateColumn, isPending: isPendingUpdateColumn } =
+    useUpdateColumnMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.column.list(),
+        })
+      },
+    })
+
+  const onSubmit = useCallback(
+    (values: Form) => {
+      console.log('onSubmit')
+      if (params.mode === 'edit') {
+        if (isPendingUpdateColumn) return
+        updateColumn({
+          id: params.editId,
+          title: values.title,
+        })
+      }
+      if (params.mode === 'create') {
+        if (isPendingCreateColumn) return
+
+        createColumn({ title: values.title })
+      }
+    },
+    [
+      createColumn,
+      isPendingCreateColumn,
+      isPendingUpdateColumn,
+      params,
+      updateColumn,
+    ]
+  )
+
+  return {
+    form,
+    register: () =>
+      form.register('title', {
+        required: '제목을 입력해주세요',
+        validate: (value) =>
+          !!value.split(' ').join('') || '공백만으로는 생성할 수 없습니다',
+      }),
+    onSubmit,
+    isPendingCreateColumn,
+    isPendingUpdateColumn,
+  }
+}
