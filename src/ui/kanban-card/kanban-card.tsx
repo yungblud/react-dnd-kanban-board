@@ -81,14 +81,14 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
   const now = new Date()
   const isExpired = dueDate ? isBefore(new Date(dueDate), now) : false
 
-  const handleClick = useCallback(() => {
+  const openKanbanCardModal = useCallback(() => {
     const overlayId = overlay.open(
       ({ isOpen, overlayId }) =>
-        isOpen && <KanbanCardModal {...props} overlayId={overlayId} />
+        isOpen && <KanbanCardModal {...props} overlayId={overlayId} id={id} />
     )
 
     return () => overlay.close(overlayId)
-  }, [props])
+  }, [props, id])
 
   useEffect(() => {
     if (!dragState) return
@@ -157,7 +157,7 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
         }}
         onPointerUp={() => {
           if (!dragState?.visible) {
-            handleClick()
+            openKanbanCardModal()
           }
           if (
             dragState?.overColumnId &&
@@ -217,6 +217,7 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
             background: '#FFF',
           }}
         >
+          {/* @TODO: fix title issue on drag */}
           <Title>{title}</Title>
         </Container>
       )}

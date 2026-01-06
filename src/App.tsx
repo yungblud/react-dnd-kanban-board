@@ -6,27 +6,10 @@ import {
   KanbanContainer,
   Layout,
 } from '@/ui'
-import {
-  queryKeys,
-  useCreateCardMutation,
-  useListColumnsQuery,
-} from './api/queries'
-import { useQueryClient } from '@tanstack/react-query'
+import { useListColumnsQuery } from './api/queries'
 
 function App() {
-  const queryClient = useQueryClient()
   const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
-
-  // @TODO: implement optimistic update
-  const { mutate: createCard, isPending: isPendingCreateCard } =
-    useCreateCardMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
 
   const columnsData = useMemo(() => columns?.data ?? [], [columns?.data])
 
@@ -51,15 +34,6 @@ function App() {
                   {...column}
                   // @TODO: enhance this prop
                   cards={cards}
-                  onClickAddCard={() => {
-                    if (isPendingCreateCard) return
-                    createCard({
-                      columnId: column.id,
-                      description: 'Mock Create Card Description',
-                      dueDate: new Date('2026-02-03').toISOString(),
-                      title: 'Mock Create Card Title',
-                    })
-                  }}
                 >
                   {cards.map((card, index) => (
                     // @TODO: enhance index prop

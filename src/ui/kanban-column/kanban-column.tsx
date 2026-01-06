@@ -18,6 +18,7 @@ import { useOnClickOutside } from 'usehooks-ts'
 import { useColumnTitleForm } from '@/lib/hooks'
 import { overlay } from 'overlay-kit'
 import { RemoveColumnConfirmModal } from '../remove-column-confirm-modal'
+import { KanbanCardModal } from '../kanban-card-modal'
 
 const Column = styled.div`
   min-height: 520px;
@@ -52,12 +53,9 @@ export const KanbanColumn = memo(
     id,
     children,
     title,
-    onClickAddCard,
     cards,
   }: PropsWithChildren<
     Column & {
-      onClickAddCard?: () => void
-    } & {
       cards: Card[]
     }
   >) => {
@@ -124,6 +122,13 @@ export const KanbanColumn = memo(
       [id]
     )
 
+    const openAddCardModal = useCallback(() => {
+      overlay.open(
+        ({ isOpen, overlayId }) =>
+          isOpen && <KanbanCardModal overlayId={overlayId} columnId={id} />
+      )
+    }, [id])
+
     return (
       <Column data-column-id={id}>
         {editMode && editMode.id === id ? (
@@ -147,7 +152,7 @@ export const KanbanColumn = memo(
           {dragState?.overColumnId === id &&
             dragState.overIndex === cards.length && <KanbanCardPlaceholder />}
         </ChildrenWrapper>
-        <Button onClick={onClickAddCard} style={{ marginTop: '0.85rem' }}>
+        <Button onClick={openAddCardModal} style={{ marginTop: '0.85rem' }}>
           카드 추가
         </Button>
       </Column>
