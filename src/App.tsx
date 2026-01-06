@@ -10,7 +10,6 @@ import {
   queryKeys,
   useCreateCardMutation,
   useListColumnsQuery,
-  useRemoveColumnMutation,
 } from './api/queries'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -18,16 +17,6 @@ function App() {
   const queryClient = useQueryClient()
   const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
 
-  // @TODO: implement optimistic update
-  const { mutate: removeColumn, isPending: isPendingRemoveColumn } =
-    useRemoveColumnMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
   // @TODO: implement optimistic update
   const { mutate: createCard, isPending: isPendingCreateCard } =
     useCreateCardMutation({
@@ -62,12 +51,6 @@ function App() {
                   {...column}
                   // @TODO: enhance this prop
                   cards={cards}
-                  onClickRemove={() => {
-                    if (isPendingRemoveColumn) return
-                    removeColumn({
-                      id: column.id,
-                    })
-                  }}
                   onClickAddCard={() => {
                     if (isPendingCreateCard) return
                     createCard({

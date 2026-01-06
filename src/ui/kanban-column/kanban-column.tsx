@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type KeyboardEventHandler,
+  type MouseEventHandler,
   type PropsWithChildren,
 } from 'react'
 import type { Card, Column } from '../../types'
@@ -15,6 +16,8 @@ import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
 import { Input } from '../input'
 import { useOnClickOutside } from 'usehooks-ts'
 import { useColumnTitleForm } from '@/lib/hooks'
+import { overlay } from 'overlay-kit'
+import { RemoveColumnConfirmModal } from '../remove-column-confirm-modal'
 
 const Column = styled.div`
   min-height: 520px;
@@ -48,12 +51,10 @@ export const KanbanColumn = memo(
     id,
     children,
     title,
-    onClickRemove,
     onClickAddCard,
     cards,
   }: PropsWithChildren<
     Column & {
-      onClickRemove?: () => void
       onClickAddCard?: () => void
     } & {
       cards: Card[]
@@ -107,6 +108,19 @@ export const KanbanColumn = memo(
         }
       },
       [form, isPendingUpdateColumn, onSubmit]
+    )
+
+    const onClickRemove = useCallback<MouseEventHandler<HTMLButtonElement>>(
+      (e) => {
+        e.currentTarget.blur()
+        overlay.open(
+          ({ isOpen, overlayId }) =>
+            isOpen && (
+              <RemoveColumnConfirmModal overlayId={overlayId} columnId={id} />
+            )
+        )
+      },
+      [id]
     )
 
     return (
