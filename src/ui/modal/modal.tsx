@@ -1,7 +1,9 @@
 import styled from '@emotion/styled'
 import { overlay } from 'overlay-kit'
-import { useCallback, type PropsWithChildren } from 'react'
+import { useCallback, useEffect, type PropsWithChildren } from 'react'
 import type { WithOverlayId } from './modal.types'
+
+let modalStack: string[] = []
 
 const Overlay = styled.div`
   position: fixed;
@@ -27,11 +29,32 @@ export const Modal = ({
 }: WithOverlayId<PropsWithChildren>) => {
   const close = useCallback(() => {
     if (overlayId) {
-      overlay.close(overlayId)
+      const overlayId = modalStack.pop()
+      if (overlayId) {
+        overlay.close(overlayId)
+      }
     } else {
       overlay.closeAll()
+      modalStack = []
     }
   }, [overlayId])
+
+  useEffect(() => {
+    if (overlayId && !modalStack.includes(overlayId)) {
+      modalStack.push(overlayId)
+    }
+  }, [overlayId])
+
+  useEffect(() => {
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        close()
+      }
+    }
+    window.addEventListener('keydown', onKeydown)
+
+    return () => window.removeEventListener('keydown', onKeydown)
+  }, [close])
 
   return (
     <Overlay
