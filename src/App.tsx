@@ -38,7 +38,6 @@ function App() {
                   cards={cards}
                 >
                   {cards.map((card, index) => (
-                    // @TODO: enhance index prop
                     <KanbanCard key={card.id} {...card} index={index} />
                   ))}
                 </KanbanColumn>

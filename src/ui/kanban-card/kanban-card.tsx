@@ -1,4 +1,4 @@
-import type { Card } from '@/types'
+import type { Card, ColumnWithCard, HttpResponse } from '@/types'
 import { overlay } from 'overlay-kit'
 import { memo, useCallback, useEffect, useRef } from 'react'
 import { KanbanCardModal } from '../kanban-card-modal'
@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
 import { Container, Title } from './kanban-card.styled'
 import { KanbanDragCard } from './kanban-card.drag'
+import { produce } from 'immer'
 
 const DRAG_THRESHOLD = 6 // px
 
@@ -70,6 +71,8 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
     return () => overlay.close(overlayId)
   }, [props, id])
 
+  const queryClient = useQueryClient()
+
   useEffect(() => {
     if (!dragState) return
     const onPointerMove = (e: PointerEvent) => {
@@ -113,10 +116,70 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
     }
   }, [dragState, moveDragState, resetDragState])
 
-  const queryClient = useQueryClient()
-
   const { mutate: moveCard } = useMoveCardMutation({
-    onSuccess: () => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.column.list(),
+      })
+
+      const prevData = queryClient.getQueryData<HttpResponse<ColumnWithCard[]>>(
+        queryKeys.column.list()
+      )
+
+      const newData: HttpResponse<ColumnWithCard[]> | undefined = prevData
+        ? produce(prevData, (draft) => {
+            const sourceColumn = draft.data.find(
+              (col) => col.id === props.columnId
+            )
+            const targetColumn = draft.data.find(
+              (col) => col.id === variables.targetColumnId
+            )
+
+            if (!sourceColumn || !targetColumn) return
+
+            const cardIndex = sourceColumn.cards.findIndex(
+              (card) => card.id === variables.id
+            )
+
+            if (cardIndex === -1) return
+
+            const [movedCard] = sourceColumn.cards.splice(cardIndex, 1)
+
+            // 같은 컬럼 내 이동
+            if (sourceColumn.id === targetColumn.id) {
+              targetColumn.cards.splice(variables.newOrder, 0, movedCard)
+            } else {
+              // 다른 컬럼으로 이동
+              movedCard.columnId = targetColumn.id
+              targetColumn.cards.splice(variables.newOrder, 0, movedCard)
+            }
+
+            // order 재계산 (양쪽 컬럼 모두)
+            sourceColumn.cards.forEach((card, index) => {
+              card.order = index
+            })
+
+            if (sourceColumn.id !== targetColumn.id) {
+              targetColumn.cards.forEach((card, index) => {
+                card.order = index
+              })
+            }
+          })
+        : undefined
+
+      queryClient.setQueryData(queryKeys.column.list(), newData)
+
+      return {
+        newData,
+        prevData,
+      }
+    },
+    onError: (error, variables, ctx) => {
+      if (ctx?.prevData) {
+        queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.column.list(),
       })
