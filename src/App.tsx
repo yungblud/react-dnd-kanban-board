@@ -1,9 +1,14 @@
 import { useMemo } from 'react'
-import { Button, KanbanCard, KanbanColumn, KanbanContainer, Layout } from '@/ui'
+import {
+  AddColumnButton,
+  KanbanCard,
+  KanbanColumn,
+  KanbanContainer,
+  Layout,
+} from '@/ui'
 import {
   queryKeys,
   useCreateCardMutation,
-  useCreateColumnMutation,
   useListColumnsQuery,
   useRemoveColumnMutation,
   useUpdateColumnMutation,
@@ -13,16 +18,7 @@ import { useQueryClient } from '@tanstack/react-query'
 function App() {
   const queryClient = useQueryClient()
   const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
-  // @TODO: implement optimistic update
-  const { mutate: createColumn, isPending: isPendingCreateColumn } =
-    useCreateColumnMutation({
-      onSuccess: () => {
-        console.log('success')
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.column.list(),
-        })
-      },
-    })
+
   // @TODO: implement optimistic update
   const { mutate: updateColumn, isPending: isPendingUpdateColumn } =
     useUpdateColumnMutation({
@@ -62,16 +58,7 @@ function App() {
 
   return (
     <Layout
-      addColumnBtn={
-        <Button
-          onClick={() => {
-            if (isPendingCreateColumn) return
-            createColumn({ title: 'Mock Title' })
-          }}
-        >
-          컬럼 추가
-        </Button>
-      }
+      addColumnBtn={<AddColumnButton />}
       kanban={
         <KanbanContainer>
           {[...columnsData]
