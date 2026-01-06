@@ -166,7 +166,7 @@ export const KanbanCardModal = memo(
             queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
           }
         },
-        onSuccess: () => {
+        onSettled: () => {
           queryClient.invalidateQueries({
             queryKey: queryKeys.column.list(),
           })
@@ -225,11 +225,12 @@ export const KanbanCardModal = memo(
             queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
           }
         },
-        onSuccess: (data) => {
+        onSettled: (data) => {
           queryClient.invalidateQueries({
             queryKey: queryKeys.column.list(),
           })
-          const newCardData = data.data
+          const newCardData = data?.data
+          if (!newCardData) return
           reset(
             {
               title: newCardData.title,

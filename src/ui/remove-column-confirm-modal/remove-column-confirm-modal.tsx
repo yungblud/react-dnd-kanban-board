@@ -44,7 +44,7 @@ export const RemoveColumnConfirmModal = memo(
             queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
           }
         },
-        onSuccess: () => {
+        onSettled: () => {
           queryClient.invalidateQueries({
             queryKey: queryKeys.column.list(),
           })

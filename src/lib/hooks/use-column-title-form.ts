@@ -63,7 +63,7 @@ export function useColumnTitleForm(params: Params) {
           queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
         }
       },
-      onSuccess: () => {
+      onSettled: () => {
         queryClient.invalidateQueries({
           queryKey: queryKeys.column.list(),
         })
@@ -107,7 +107,7 @@ export function useColumnTitleForm(params: Params) {
           queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
         }
       },
-      onSuccess: () => {
+      onSettled: () => {
         queryClient.invalidateQueries({
           queryKey: queryKeys.column.list(),
         })
