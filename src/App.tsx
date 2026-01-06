@@ -9,7 +9,9 @@ import {
 import { useListColumnsQuery } from './api/queries'
 
 function App() {
-  const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery()
+  const { data: columns, isLoading: isLoadingColumns } = useListColumnsQuery({
+    refetchOnMount: false,
+  })
 
   const columnsData = useMemo(() => columns?.data ?? [], [columns?.data])
 
