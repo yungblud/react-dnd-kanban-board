@@ -129,6 +129,9 @@ export const KanbanCardModal = memo(
                 ...prevData,
                 data: prevData.data.map((value) => {
                   if (value.id === columnId) {
+                    const lastCardOrder = value.cards.at(-1)?.order
+                    const nextCardOrder =
+                      typeof lastCardOrder === 'number' ? lastCardOrder + 1 : 0
                     return {
                       ...value,
                       cards: value.cards.concat({
@@ -137,7 +140,7 @@ export const KanbanCardModal = memo(
                         createdAt: new Date().toISOString(),
                         description: variables.description,
                         dueDate: variables.dueDate,
-                        order: value.cards.length,
+                        order: nextCardOrder,
                         title: variables.title,
                         updatedAt: new Date().toISOString(),
                       }),
@@ -148,7 +151,10 @@ export const KanbanCardModal = memo(
               }
             : undefined
 
-          queryClient.setQueryData(queryKeys.column.list(), newData)
+          queryClient.setQueryData<HttpResponse<ColumnWithCard[]>>(
+            queryKeys.column.list(),
+            newData
+          )
 
           return {
             newData,
