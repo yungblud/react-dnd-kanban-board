@@ -9,6 +9,7 @@ import styled from '@emotion/styled'
 import { Button } from '../button'
 import { useForm } from 'react-hook-form'
 import { overlay } from 'overlay-kit'
+import type { ColumnWithCard, HttpResponse } from '@/types'
 
 const Inner = styled.div`
   display: flex;
@@ -21,16 +22,50 @@ type Form = {
 
 export const AddColumnModal = ({ overlayId }: WithOverlayId) => {
   const queryClient = useQueryClient()
-  // @TODO: implement optimistic update
   const { mutate: createColumn, isPending: isPendingCreateColumn } =
     useCreateColumnMutation({
+      onMutate: async (variables) => {
+        await queryClient.cancelQueries({
+          queryKey: queryKeys.column.list(),
+        })
+
+        const prevData = queryClient.getQueryData<
+          HttpResponse<ColumnWithCard[]>
+        >(queryKeys.column.list())
+
+        const newColumn = {
+          cards: [],
+          createdAt: new Date().toISOString(),
+          id: crypto.randomUUID(),
+          order: prevData?.data ? (prevData.data.at(-1)?.order ?? 0) + 1 : 1,
+          title: variables.title,
+        }
+
+        const newData: HttpResponse<ColumnWithCard[]> = {
+          ...prevData,
+          data: prevData?.data ? prevData.data.concat(newColumn) : [newColumn],
+        }
+
+        queryClient.setQueryData(queryKeys.column.list(), newData)
+
+        if (overlayId) {
+          overlay.close(overlayId)
+        }
+
+        return {
+          prevData,
+          newData,
+        }
+      },
+      onError: (error, variables, ctx) => {
+        if (ctx?.prevData) {
+          queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
+        }
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: queryKeys.column.list(),
         })
-        if (overlayId) {
-          overlay.close(overlayId)
-        }
       },
     })
 
