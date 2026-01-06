@@ -70,9 +70,43 @@ export function useColumnTitleForm(params: Params) {
       },
     })
 
-  // @TODO: implement optimistic update
   const { mutate: updateColumn, isPending: isPendingUpdateColumn } =
     useUpdateColumnMutation({
+      onMutate: async (variables) => {
+        await queryClient.cancelQueries({
+          queryKey: queryKeys.column.list(),
+        })
+        const prevData = queryClient.getQueryData<
+          HttpResponse<ColumnWithCard[]>
+        >(queryKeys.column.list())
+
+        const newData: HttpResponse<ColumnWithCard[]> = {
+          ...prevData,
+          data: prevData?.data
+            ? prevData.data.map((value) => {
+                if (value.id === variables.id) {
+                  return {
+                    ...value,
+                    title: variables.title,
+                  }
+                }
+                return value
+              })
+            : [],
+        }
+
+        queryClient.setQueryData(queryKeys.column.list(), newData)
+
+        return {
+          newData,
+          prevData,
+        }
+      },
+      onError: (error, variables, ctx) => {
+        if (ctx?.prevData) {
+          queryClient.setQueryData(queryKeys.column.list(), ctx.prevData)
+        }
+      },
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: queryKeys.column.list(),

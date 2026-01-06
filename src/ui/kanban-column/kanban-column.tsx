@@ -69,15 +69,17 @@ export const KanbanColumn = memo(
       )
     )
 
-    const { form, register, onSubmit } = useColumnTitleForm({
-      mode: 'edit',
-      editId: id,
-    })
+    const { form, register, onSubmit, isPendingUpdateColumn } =
+      useColumnTitleForm({
+        mode: 'edit',
+        editId: id,
+      })
 
     const handleClickOutside = useCallback(() => {
+      if (isPendingUpdateColumn) return
       onSubmit(form.getValues())
       setEditMode(null)
-    }, [form, onSubmit])
+    }, [form, isPendingUpdateColumn, onSubmit])
 
     useOnClickOutside(editInputFormRef, handleClickOutside)
 
@@ -97,11 +99,14 @@ export const KanbanColumn = memo(
           if (form.formState.errors.title) {
             return
           }
+          if (isPendingUpdateColumn) {
+            return
+          }
           onSubmit(form.getValues())
           setEditMode(null)
         }
       },
-      [form, onSubmit]
+      [form, isPendingUpdateColumn, onSubmit]
     )
 
     return (
