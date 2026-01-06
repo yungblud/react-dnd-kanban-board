@@ -10,24 +10,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { overlay } from 'overlay-kit'
 import { Button } from '../button'
 import { KanbanCardRemoveModal } from '../kanban-card-remove-modal'
+import { Input } from '../input'
+import { Label } from '../label/label'
 
 const ModalInner = styled.div`
   display: flex;
   flex-direction: column;
   width: 662px;
-`
-
-const Label = styled.label`
-  font-weight: 400;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  margin-top: 1rem;
-`
-
-const Input = styled.input`
-  border: 1px solid rgb(242, 243, 247);
-  padding: 0.5rem;
-  border-radius: 4px;
 `
 
 const Textarea = styled.textarea`
