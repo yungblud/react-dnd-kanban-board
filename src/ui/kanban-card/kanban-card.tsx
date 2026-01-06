@@ -1,17 +1,15 @@
 import type { Card } from '@/types'
-import styled from '@emotion/styled'
 import { overlay } from 'overlay-kit'
 import { memo, useCallback, useEffect, useRef } from 'react'
 import { KanbanCardModal } from '../kanban-card-modal'
 import { isBefore } from 'date-fns'
-import { motion } from 'framer-motion'
 import { useDragStore } from '@/lib/store'
 import { useShallow } from 'zustand/shallow'
 import { queryKeys, useMoveCardMutation } from '@/api/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
-
-const motionDiv = motion.div
+import { Container, Title } from './kanban-card.styled'
+import { KanbanDragCard } from './kanban-card.drag'
 
 const DRAG_THRESHOLD = 6 // px
 
@@ -46,24 +44,6 @@ function getInsertIndex(columnEl: HTMLElement, pointerY: number) {
 
   return cards.length
 }
-
-const Container = styled(motionDiv)<{ $isExpired?: boolean }>`
-  border-radius: 12px;
-  border: ${(props) =>
-    props.$isExpired ? '1px solid red' : '1px solid black'};
-
-  padding: 12px 12px;
-  cursor: pointer;
-  width: 240px;
-
-  margin-top: 0.5rem;
-`
-
-const Title = styled.p`
-  margin: unset;
-  font-size: 0.875rem;
-  font-weight: 550;
-`
 
 export const KanbanCard = memo((props: Card & { index: number }) => {
   const { title, dueDate, id, columnId, index } = props
@@ -201,26 +181,7 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
       >
         <Title>{title}</Title>
       </Container>
-      {dragState && dragState.visible && (
-        <Container
-          style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            pointerEvents: 'none',
-            zIndex: 1000,
-            transform: `translate3d(
-        ${dragState.pointerX - dragState.offsetX}px,
-        ${dragState.pointerY - dragState.offsetY}px,
-        0
-      )`,
-            background: '#FFF',
-          }}
-        >
-          {/* @TODO: fix title issue on drag */}
-          <Title>{title}</Title>
-        </Container>
-      )}
+      <KanbanDragCard />
     </>
   )
 })
