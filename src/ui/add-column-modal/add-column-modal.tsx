@@ -36,26 +36,41 @@ export const AddColumnModal = ({ overlayId }: WithOverlayId) => {
 
   const form = useForm<Form>()
 
-  const handleCreateColumn = useCallback(() => {
-    if (isPendingCreateColumn) return
+  const onSubmit = useCallback(
+    (values: Form) => {
+      if (isPendingCreateColumn) return
 
-    const titleValue = form.getValues().title
-
-    createColumn({ title: titleValue })
-  }, [createColumn, form, isPendingCreateColumn])
+      createColumn({ title: values.title })
+    },
+    [createColumn, isPendingCreateColumn]
+  )
 
   return (
     <Modal overlayId={overlayId}>
-      <Inner>
-        <Label>컬럼 제목</Label>
-        <Input placeholder="제목을 입력해주세요" {...form.register('title')} />
-        <Button
-          onClick={handleCreateColumn}
-          style={{ marginTop: '1rem', marginLeft: 'auto' }}
-        >
-          생성하기
-        </Button>
-      </Inner>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Inner>
+          <Label>컬럼 제목</Label>
+          <Input
+            placeholder="제목을 입력해주세요"
+            {...form.register('title', {
+              required: '제목을 입력해주세요',
+              validate: (value) =>
+                !!value.split(' ').join('') ||
+                '공백만으로는 생성할 수 없습니다',
+            })}
+          />
+          {form.formState.errors.title && (
+            <p>{form.formState.errors.title.message}</p>
+          )}
+          <Button
+            type="submit"
+            disabled={isPendingCreateColumn}
+            style={{ marginTop: '1rem', marginLeft: 'auto' }}
+          >
+            생성하기
+          </Button>
+        </Inner>
+      </form>
     </Modal>
   )
 }
