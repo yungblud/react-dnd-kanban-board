@@ -18,6 +18,7 @@ README 필수 사항 및 각각 프로젝트의 큰 맥락들을 종합하였습
 - Form: form validation 및 form state 관리를 구현하기 위해 react-hook-form을 사용하였습니다
 - Server State: react-query (서버 상태를 관리하기 위함)
 - modal UI를 구현하기 위해 overlay-kit을 사용하였습니다
+- Font: NotoSans KR 적용하였습니다
 
 ## MSW (mock api)
 
@@ -97,10 +98,6 @@ README 필수 사항 및 각각 프로젝트의 큰 맥락들을 종합하였습
     - card create api: id 자체를 클라이언트에서 받는다
     - 지금은 column list api 및 card detail api가 조회의 전부이지만, cards by column id 등의 GQL 방식처럼 바꾸게 되면 render to fetch 형태도 가능할 것으로 생각했습니다 (기본적으로 모두 전체 데이터를 불러오는 것이 아닌, 필요한 데이터를 render to fetch)
     - autofill (자동완성 클릭 시) isExpired color 처리
-
-## Misc
-
-- Font: NotoSans KR 적용하였습니다
-- create card -> optimistic update 시, client-side에서 `crypto.randomUUID()`를 id로 부여하는데, 서버에서 transaction이 완료되기 전 move card api를 콜하게 되면 not found 가 뜨는 이슈가 있습니다. 해당 부분은 실무에서는 client-side에서 직접 id 값을 http로 전송하면 되는 개선되는 부분이라고 생각하여 굳이 수정하진 않았습니다.
+  - create card -> optimistic update 시, client-side에서 `crypto.randomUUID()`를 id로 부여하는데, 서버에서 transaction이 완료되기 전 move card api를 콜하게 되면 not found 가 뜨는 이슈가 있습니다. 우아하게 로딩 처리를 해야 하거나 API 스펙 자체에 id 값을 client-side에서 생성하여 주입해주면 개선이 될 것 같은데 현재 상황에서 완벽하게 처리하기에는 애매하여 그대로 두었습니다. (혹은 create card -> optimistic update -> 칸반 카드 모달 디테일 빠르게 열기 -> 수정 -> Not Found)
 
 🧪 문서를 꼼꼼히 읽었습니다
