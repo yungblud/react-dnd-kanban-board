@@ -299,8 +299,14 @@ export const KanbanCardModal = memo(
               {...register('title', {
                 required: true,
                 maxLength: 100,
+                validate: (value) =>
+                  !!value.split(' ').join('') ||
+                  '공백만으로는 생성할 수 없습니다',
               })}
             />
+            {formState.errors.title && (
+              <p style={{ color: 'red' }}>{formState.errors.title.message}</p>
+            )}
             <Label>설명</Label>
             <Textarea {...register('description')}>
               {card?.description}
