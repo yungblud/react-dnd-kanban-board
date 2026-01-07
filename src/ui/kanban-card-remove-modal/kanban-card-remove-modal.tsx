@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import styled from '@emotion/styled'
 import { overlay } from 'overlay-kit'
 import type { ColumnWithCard, HttpResponse } from '@/types'
+import { useCallback } from 'react'
 
 const Inner = styled.div`
   display: flex;
@@ -58,20 +59,20 @@ export const KanbanCardRemoveModal = ({
         })
       },
     })
+
+  const onConfirm = useCallback(() => {
+    if (isPendingRemoveCard) return
+    removeCard({
+      id,
+    })
+    overlay.closeAll()
+  }, [id, isPendingRemoveCard, removeCard])
+
   return (
     <Modal overlayId={overlayId}>
       <Inner>
         <p>삭제하시겠습니까?</p>
-        <Button
-          onClick={() => {
-            if (isPendingRemoveCard) return
-            removeCard({
-              id,
-            })
-            overlay.closeAll()
-          }}
-          style={{ marginLeft: 'auto' }}
-        >
+        <Button onClick={onConfirm} style={{ marginLeft: 'auto' }}>
           네
         </Button>
       </Inner>
