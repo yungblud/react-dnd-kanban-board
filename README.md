@@ -96,6 +96,7 @@ README 필수 사항 및 각각 프로젝트의 큰 맥락들을 종합하였습
   - api 자체를 offline first 방식에 맞추어 보는 것도 괜찮은 방식이라는 생각이 들었습니다
     - card create api: id 자체를 클라이언트에서 받는다
     - 지금은 column list api 및 card detail api가 조회의 전부이지만, cards by column id 등의 GQL 방식처럼 바꾸게 되면 render to fetch 형태도 가능할 것으로 생각했습니다 (기본적으로 모두 전체 데이터를 불러오는 것이 아닌, 필요한 데이터를 render to fetch)
+    - autofill (자동완성 클릭 시) isExpired color 처리
 
 ## Misc
 
