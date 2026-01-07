@@ -22,6 +22,7 @@
 ## MSW (mock api)
 
 - mock api 서버는 msw를 사용하여 구현하였습니다
+- 위치는 `src/mocks`에서 관리하고 있습니다
 - `.env.development`의 환경변수를 이용하여 제어가 가능합니다
 - api prefix로 `/api`를 붙였습니다
 - 200 ~ 500ms 사이로 랜덤하게 delay를 붙였습니다
@@ -45,6 +46,12 @@
 
 - hook form의 isDirty를 활용하여, 저장 (수정 시) 버튼 Conditional Render
 - 필요한 Form validation 수행
+
+## Drag + zustand
+
+- drag 효과의 상태를 관리하기 위해 `src/lib/store/drag-store.ts`로 관리하고 있습니다
+- 각각의 구독하는 component들은 KanbanCard (카드 drag 효과), KanbanCardPlaceholder (drag placeholder 효과) 이 있습니다
+- 구독하는 컴포넌트들의 관심사들을 분리하여 불필요하게 모든 모든 카드나 모든 컬럼이 리렌더링 되는 현상을 방지하였습니다
 
 ## Misc
 

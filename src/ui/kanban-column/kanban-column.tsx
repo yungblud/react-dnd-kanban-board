@@ -9,10 +9,8 @@ import {
   type MouseEventHandler,
   type PropsWithChildren,
 } from 'react'
-import type { Card, Column } from '../../types'
+import type { Column } from '../../types'
 import { Button } from '../button'
-import { useDragStore } from '@/lib/store'
-import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
 import { Input } from '../input'
 import { useOnClickOutside } from 'usehooks-ts'
 import { useColumnTitleForm } from '@/lib/hooks'
@@ -49,25 +47,9 @@ const Title = styled.h1`
 `
 
 export const KanbanColumn = memo(
-  ({
-    id,
-    children,
-    title,
-    cards,
-  }: PropsWithChildren<
-    Column & {
-      cards: Card[]
-    }
-  >) => {
+  ({ id, children, title }: PropsWithChildren<Column>) => {
     const editInputFormRef = useRef<HTMLFormElement>(null!)
     const [editMode, setEditMode] = useState<{ id: string } | null>(null)
-    const dragState = useDragStore(
-      useCallback(
-        (state) =>
-          state.dragState?.overColumnId === id ? state.dragState : null,
-        [id]
-      )
-    )
 
     const { form, register, onSubmit, isPendingUpdateColumn } =
       useColumnTitleForm({
@@ -146,12 +128,7 @@ export const KanbanColumn = memo(
         <Button onClick={onClickRemove} style={{ marginTop: '0.5rem' }}>
           삭제하기
         </Button>
-        <ChildrenWrapper>
-          {children}
-          {/* 맨 마지막 drop */}
-          {dragState?.overColumnId === id &&
-            dragState.overIndex === cards.length && <KanbanCardPlaceholder />}
-        </ChildrenWrapper>
+        <ChildrenWrapper>{children}</ChildrenWrapper>
         <Button onClick={openAddCardModal} style={{ marginTop: '0.85rem' }}>
           카드 추가
         </Button>

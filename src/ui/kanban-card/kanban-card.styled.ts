@@ -13,6 +13,8 @@ export const Container = styled(motionDiv)<{ $isExpired?: boolean }>`
   width: 240px;
 
   margin-top: 0.5rem;
+
+  user-select: none;
 `
 
 export const Title = styled.p`

@@ -125,30 +125,25 @@ export const KanbanCardModal = memo(
           >(queryKeys.column.list())
 
           const newData: HttpResponse<ColumnWithCard[]> | undefined = prevData
-            ? {
-                ...prevData,
-                data: prevData.data.map((value) => {
-                  if (value.id === columnId) {
-                    const lastCardOrder = value.cards.at(-1)?.order
-                    const nextCardOrder =
-                      typeof lastCardOrder === 'number' ? lastCardOrder + 1 : 0
-                    return {
-                      ...value,
-                      cards: value.cards.concat({
-                        id: crypto.randomUUID(),
-                        columnId: columnId!,
-                        createdAt: new Date().toISOString(),
-                        description: variables.description,
-                        dueDate: variables.dueDate,
-                        order: nextCardOrder,
-                        title: variables.title,
-                        updatedAt: new Date().toISOString(),
-                      }),
-                    }
-                  }
-                  return value
-                }),
-              }
+            ? produce(prevData, (draft) => {
+                const column = draft.data.find((c) => c.id === columnId)
+                if (!column) return
+
+                const lastOrder = column.cards.at(-1)?.order
+                const nextOrder =
+                  typeof lastOrder === 'number' ? lastOrder + 1 : 0
+
+                column.cards.push({
+                  id: crypto.randomUUID(),
+                  columnId: columnId!,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  title: variables.title,
+                  description: variables.description,
+                  dueDate: variables.dueDate,
+                  order: nextOrder,
+                })
+              })
             : undefined
 
           queryClient.setQueryData<HttpResponse<ColumnWithCard[]>>(
@@ -356,7 +351,7 @@ export const KanbanCardModal = memo(
                 disabled={
                   isEditMode
                     ? isPendingUpdateCard || hasFormError
-                    : hasFormError
+                    : isPendingCreateCard || hasFormError
                 }
               >
                 {isEditMode ? '저장하기' : '카드 만들기'}
