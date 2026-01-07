@@ -1,23 +1,22 @@
-# Hello, This is README.
+# React DnD Kanban Board
 
-안녕하세요, 최동호 지원자입니다.
-아래에는 Project에 대한 간단한 설명을 담았습니다.
+README 필수 사항 및 각각 프로젝트의 큰 맥락들을 종합하였습니다.
 
-## Specs
-
-- Vite + React + Typescript (Simple Project용으로 선택)
-- Package Manager: npm
-- Code Formatter: eslint + prettier + lefthook (pre-commit commitlint)
-- Styles: emotion (css in js용으로 style prop을 원활히 관리하기 위하여 선택)
-- Form: react-hook-form (복잡한 form input 상태관리용)
-- server state: react-query (서버 상태를 관리하기 위함)
-
-## Run
+## Run (실행 방법)
 
 - git clone https://github.com/yungblud/protopie-assignment
 - cd protopie-assignment
 - npm install
 - npm run dev
+
+## Specs (기술 스택)
+
+- Vite + React + Typescript (Simple Project용으로 선택)
+- Package Manager: npm v10.9.0 (with node v22.11.0)
+- Code Formatter: eslint + prettier + lefthook (pre-commit commitlint)
+- Styles: emotion (css in js용으로 style prop을 원활히 관리하기 위하여 선택)
+- Form: react-hook-form (복잡한 form input 상태관리용)
+- server state: react-query (서버 상태를 관리하기 위함)
 
 ## MSW (mock api)
 
@@ -83,5 +82,22 @@
 - [x] 5-1. API 에러 처리: UI 따로 표기하지 않음 (대부분의 Update는 낙관적 업데이트 + 에러 롤백이 진행되므로 크리티컬한 에러가 아닌 것으로 판단 후 미노출 하는 것이 UX상 낫다는 판단 like offline-first), 낙관적 업데이트 + 에러 롤백만 진행
 - [x] 5-2. 유효성 검사
 - [ ] 5-3. 빈 상태 처리
+
+## 설계 결정
+
+- 상태 관리 전략: Notion과 같은 Offline First 방식을 염두해두고 작업했습니다 (react-query optimistic update 다수 적용)
+- 컴포넌트 설계 원칙
+  - 작은 규모의 프로젝트라서 ui 폴더에 component들을 담았습니다
+  - 불필요한 리렌더를 방지하고자 memoize를 활용했습니다
+  - 불필요한 리렌더를 방지하고자 zustand store 조건부 구독하며 관심사를 분리하였습니다
+- 기타 고민했던 부분과 결정 사항
+  - offline first 방식과 비슷하게 하려고 했던 부분을 가장 염두해 두었던 것 같습니다
+
+## 개선하고 싶은 점 (선택)
+
+- 추가 시간이 있었다면 개선하고 싶은 부분
+  - api 자체를 offline first 방식에 맞추어 보는 것도 괜찮은 방식이라는 생각이 들었습니다
+    - card create api: id 자체를 클라이언트에서 받는다
+    - 지금은 column list api 및 card detail api가 조회의 전부이지만, cards by column id 등의 GQL 방식처럼 바꾸게 되면 render to fetch 형태도 가능할 것으로 생각했습니다 (기본적으로 모두 전체 데이터를 불러오는 것이 아닌, 필요한 데이터를 render to fetch)
 
 🧪 문서를 꼼꼼히 읽었습니다
