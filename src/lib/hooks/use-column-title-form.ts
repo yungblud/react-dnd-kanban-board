@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 
-type Form = {
+export type ColumnTitleForm = {
   title: string
 }
 
@@ -22,7 +22,7 @@ type Params =
     }
 
 export function useColumnTitleForm(params: Params) {
-  const form = useForm<Form>({
+  const form = useForm<ColumnTitleForm>({
     mode: 'onChange',
   })
 
@@ -115,7 +115,7 @@ export function useColumnTitleForm(params: Params) {
     })
 
   const onSubmit = useCallback(
-    (values: Form) => {
+    (values: ColumnTitleForm) => {
       if (params.mode === 'edit') {
         if (isPendingUpdateColumn || !form.formState.isDirty) return
         updateColumn({

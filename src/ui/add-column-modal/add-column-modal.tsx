@@ -4,7 +4,7 @@ import { Input } from '../input'
 import { Label } from '../label/label'
 import styled from '@emotion/styled'
 import { Button } from '../button'
-import { useColumnTitleForm } from '@/lib/hooks'
+import { useColumnTitleForm, type ColumnTitleForm } from '@/lib/hooks'
 import { overlay } from 'overlay-kit'
 import { useCallback, type KeyboardEventHandler } from 'react'
 
@@ -30,16 +30,25 @@ export const AddColumnModal = ({ overlayId }: WithOverlayId) => {
     [formError]
   )
 
+  const closeOverlay = useCallback(() => {
+    if (overlayId) {
+      overlay.close(overlayId)
+    }
+  }, [overlayId])
+
+  const handleSubmitForm = useCallback(
+    (values: ColumnTitleForm) => {
+      onSubmit(values)
+      closeOverlay()
+    },
+    [closeOverlay, onSubmit]
+  )
+
   return (
     <Modal overlayId={overlayId}>
       <form
         onKeyDown={onFormKeydown}
-        onSubmit={form.handleSubmit((values) => {
-          onSubmit(values)
-          if (overlayId) {
-            overlay.close(overlayId)
-          }
-        })}
+        onSubmit={form.handleSubmit(handleSubmitForm)}
       >
         <Inner>
           <Label>컬럼 제목</Label>
