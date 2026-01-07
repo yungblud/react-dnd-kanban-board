@@ -18,7 +18,7 @@ import { overlay } from 'overlay-kit'
 import { RemoveColumnConfirmModal } from '../remove-column-confirm-modal'
 import { KanbanCardModal } from '../kanban-card-modal'
 
-const Column = styled.div`
+const StyledColumn = styled.div`
   min-height: 520px;
   min-width: 268px;
 
@@ -112,7 +112,7 @@ export const KanbanColumn = memo(
     }, [id])
 
     return (
-      <Column data-column-id={id}>
+      <StyledColumn data-column-id={id}>
         {editMode && editMode.id === id ? (
           <form ref={editInputFormRef} onSubmit={(e) => e.preventDefault()}>
             <Input {...register()} autoFocus onKeyDown={onEditInputKeydown} />
@@ -132,7 +132,7 @@ export const KanbanColumn = memo(
         <Button onClick={openAddCardModal} style={{ marginTop: '0.85rem' }}>
           카드 추가
         </Button>
-      </Column>
+      </StyledColumn>
     )
   }
 )

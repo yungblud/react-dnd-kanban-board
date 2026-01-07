@@ -22,14 +22,22 @@ const BtnWrapper = styled.div`
 export const Layout = ({
   addColumnBtn,
   kanban,
+  isEmpty,
 }: {
   addColumnBtn: ReactNode
   kanban: ReactNode
+  isEmpty?: boolean
 }) => {
   return (
     <LayoutWrapper>
       <BtnWrapper>{addColumnBtn}</BtnWrapper>
-      {kanban}
+      {isEmpty ? (
+        <div>
+          <p>첫 번째 컬럼을 추가해보세요</p>
+        </div>
+      ) : (
+        kanban
+      )}
     </LayoutWrapper>
   )
 }

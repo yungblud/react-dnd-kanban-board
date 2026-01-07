@@ -26,21 +26,40 @@ function App() {
       }))
   }, [columns])
 
+  const isEmptyColumns = useMemo(
+    () => !isLoadingColumns && columns?.data.length === 0,
+    [columns?.data.length, isLoadingColumns]
+  )
+
   if (isLoadingColumns) {
     return null
   }
 
   return (
     <Layout
+      isEmpty={isEmptyColumns}
       addColumnBtn={<AddColumnButton />}
       kanban={
         <KanbanContainer>
           {columnsData.map((column) => {
+            const isEmpty = column.cards.length === 0
             return (
               <KanbanColumn key={column.id} {...column}>
-                {column.cards.map((card, index) => (
-                  <KanbanCard key={card.id} {...card} index={index} />
-                ))}
+                {isEmpty ? (
+                  <div
+                    style={{
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <p>아래 버튼으로 카드를 추가해보세요</p>
+                  </div>
+                ) : (
+                  column.cards.map((card, index) => (
+                    <KanbanCard key={card.id} {...card} index={index} />
+                  ))
+                )}
                 {/* 맨 마지막 drop */}
                 <KanbanCardPlaceholder.ColumnPlaceholder
                   columnId={column.id}
