@@ -10,7 +10,6 @@ import {
 import { KanbanCardModal } from '../kanban-card-modal'
 import { isBefore } from 'date-fns'
 import { useDragStore } from '@/lib/store'
-import { useShallow } from 'zustand/shallow'
 import { queryKeys, useMoveCardMutation } from '@/api/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
@@ -25,13 +24,15 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
 
   const dragStartPointRef = useRef<{ x: number; y: number } | null>(null)
 
-  // @TODO: enhance subscribe and rerender issue
-  const dragState = useDragStore(useShallow((state) => state.dragState))
-  const initializeDragState = useDragStore(
-    useShallow((state) => state.initialize)
+  const dragState = useDragStore(
+    useCallback(
+      (state) => (state.dragState?.cardId === id ? state.dragState : null),
+      [id]
+    )
   )
-  const resetDragState = useDragStore(useShallow((state) => state.reset))
-  const moveDragState = useDragStore(useShallow((state) => state.move))
+  const initializeDragState = useDragStore((state) => state.initialize)
+  const resetDragState = useDragStore((state) => state.reset)
+  const moveDragState = useDragStore((state) => state.move)
 
   const now = new Date()
   const isExpired = dueDate ? isBefore(new Date(dueDate), now) : false
@@ -206,8 +207,10 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
 
   return (
     <>
-      {dragState?.overColumnId === columnId &&
-        dragState.overIndex === index && <KanbanCardPlaceholder />}
+      <KanbanCardPlaceholder.CardPlaceholder
+        columnId={columnId}
+        cardIndex={index}
+      />
       <Container
         data-card-id={id}
         initial={{
