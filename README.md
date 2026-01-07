@@ -4,8 +4,8 @@ README 필수 사항 및 각각 프로젝트의 큰 맥락들을 종합하였습
 
 ## Run (실행 방법)
 
-- git clone https://github.com/yungblud/protopie-assignment
-- cd protopie-assignment
+- git clone https://github.com/yungblud/react-dnd-kanban-board
+- cd react-dnd-kanban-board
 - npm install
 - npm run dev
 
