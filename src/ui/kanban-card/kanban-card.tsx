@@ -1,6 +1,12 @@
 import type { Card, ColumnWithCard, HttpResponse } from '@/types'
 import { overlay } from 'overlay-kit'
-import { memo, useCallback, useEffect, useRef } from 'react'
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  type PointerEventHandler,
+} from 'react'
 import { KanbanCardModal } from '../kanban-card-modal'
 import { isBefore } from 'date-fns'
 import { useDragStore } from '@/lib/store'
@@ -11,40 +17,8 @@ import { KanbanCardPlaceholder } from '../kanban-card-placeholder'
 import { Container, Title } from './kanban-card.styled'
 import { KanbanDragCard } from './kanban-card.drag'
 import { produce } from 'immer'
-
-const DRAG_THRESHOLD = 6 // px
-
-function getTargetColumn(x: number, y: number): HTMLElement | null {
-  const columns = document.querySelectorAll<HTMLElement>('[data-column-id]')
-
-  for (const col of columns) {
-    const rect = col.getBoundingClientRect()
-    if (
-      x >= rect.left &&
-      x <= rect.right &&
-      y >= rect.top &&
-      y <= rect.bottom
-    ) {
-      return col
-    }
-  }
-  return null
-}
-
-function getInsertIndex(columnEl: HTMLElement, pointerY: number) {
-  const cards = Array.from(
-    columnEl.querySelectorAll<HTMLElement>('[data-card-id]')
-  )
-
-  for (let i = 0; i < cards.length; i++) {
-    const rect = cards[i].getBoundingClientRect()
-    if (pointerY < rect.top + rect.height / 2) {
-      return i
-    }
-  }
-
-  return cards.length
-}
+import { getInsertIndex, getTargetColumn } from './kanban-card.utils'
+import { DRAG_THRESHOLD } from './kanban-card.constants'
 
 export const KanbanCard = memo((props: Card & { index: number }) => {
   const { title, dueDate, id, columnId, index } = props
@@ -186,6 +160,50 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
     },
   })
 
+  const onCardPointerUp = useCallback(() => {
+    if (!dragState?.visible) {
+      openKanbanCardModal()
+    }
+    if (dragState?.overColumnId && typeof dragState.overIndex === 'number') {
+      moveCard({
+        id,
+        targetColumnId: dragState.overColumnId,
+        newOrder: dragState.overIndex,
+      })
+    }
+    resetDragState()
+  }, [dragState, id, moveCard, openKanbanCardModal, resetDragState])
+
+  const onCardPointerDown = useCallback<PointerEventHandler<HTMLDivElement>>(
+    (e) => {
+      const rect = e.currentTarget.getBoundingClientRect()
+
+      const pointerX = e.clientX
+      const pointerY = e.clientY
+
+      const offsetX = pointerX - rect.left
+      const offsetY = pointerY - rect.top
+
+      initializeDragState({
+        cardId: id,
+        fromColumnId: columnId,
+        pointerX,
+        pointerY,
+        offsetX,
+        offsetY,
+        visible: false,
+      })
+
+      e.currentTarget.setPointerCapture(e.pointerId)
+
+      dragStartPointRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+      }
+    },
+    [columnId, id, initializeDragState]
+  )
+
   return (
     <>
       {dragState?.overColumnId === columnId &&
@@ -198,49 +216,9 @@ export const KanbanCard = memo((props: Card & { index: number }) => {
         whileHover={{
           background: 'rgb(242, 243, 247)',
         }}
-        onPointerUp={() => {
-          if (!dragState?.visible) {
-            openKanbanCardModal()
-          }
-          if (
-            dragState?.overColumnId &&
-            typeof dragState.overIndex === 'number'
-          ) {
-            moveCard({
-              id,
-              targetColumnId: dragState.overColumnId,
-              newOrder: dragState.overIndex,
-            })
-          }
-          resetDragState()
-        }}
+        onPointerUp={onCardPointerUp}
         $isExpired={isExpired}
-        onPointerDown={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-
-          const pointerX = e.clientX
-          const pointerY = e.clientY
-
-          const offsetX = pointerX - rect.left
-          const offsetY = pointerY - rect.top
-
-          initializeDragState({
-            cardId: id,
-            fromColumnId: columnId,
-            pointerX,
-            pointerY,
-            offsetX,
-            offsetY,
-            visible: false,
-          })
-
-          e.currentTarget.setPointerCapture(e.pointerId)
-
-          dragStartPointRef.current = {
-            x: e.clientX,
-            y: e.clientY,
-          }
-        }}
+        onPointerDown={onCardPointerDown}
       >
         <Title>{title}</Title>
       </Container>
