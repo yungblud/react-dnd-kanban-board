@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import {
   AddColumnButton,
   KanbanCard,
+  KanbanCardPlaceholder,
   KanbanColumn,
   KanbanContainer,
   Layout,
@@ -36,15 +37,15 @@ function App() {
         <KanbanContainer>
           {columnsData.map((column) => {
             return (
-              <KanbanColumn
-                key={column.id}
-                {...column}
-                // @TODO: enhance this prop
-                cards={column.cards}
-              >
+              <KanbanColumn key={column.id} {...column}>
                 {column.cards.map((card, index) => (
                   <KanbanCard key={card.id} {...card} index={index} />
                 ))}
+                {/* 맨 마지막 drop */}
+                <KanbanCardPlaceholder.ColumnPlaceholder
+                  columnId={column.id}
+                  columnCardCount={column.cards.length}
+                />
               </KanbanColumn>
             )
           })}
